@@ -327,20 +327,24 @@
     </section>
 
     <section class="section paper-2" id="novini" aria-labelledby="novini-title">
-      <div class="wrap news-grid">
-        <div class="section-head">
-          <p class="eyebrow">Новини</p>
-          <h2 id="novini-title">Последно от клуба</h2>
-          <p>Снимки, резултати и новини публикуваме всяка седмица във Facebook.</p>
-          <p><a class="link-arrow" href="https://www.facebook.com/107623030976164" target="_blank" rel="noopener">Към Facebook</a></p>
-        </div>
-        <div class="fb" id="fb">
-          <div class="fb-facade">
-            <p class="fb-title">Публикациите от Facebook</p>
-            <p class="muted">За да ги покажем тук, браузърът ви ще се свърже с Facebook (Meta), който може да запише бисквитки.</p>
-            <button type="button" class="btn btn-dark" id="fb-load" hidden>Покажи публикациите</button>
+      <div class="wrap">
+        <div class="news-grid">
+          <div class="section-head">
+            <p class="eyebrow">Новини</p>
+            <h2 id="novini-title">Последно от клуба</h2>
+            <p>Снимки, резултати и новини публикуваме всяка седмица във Facebook.</p>
+            <p><a class="link-arrow" href="https://www.facebook.com/107623030976164" target="_blank" rel="noopener">Към Facebook</a></p>
+          </div>
+          <!-- Fallback while there are no copied posts (data/posts.json): Facebook's own box, loaded on click. -->
+          <div class="fb" id="fb">
+            <div class="fb-facade">
+              <p class="fb-title">Публикациите от Facebook</p>
+              <p class="muted">За да ги покажем тук, браузърът ви ще се свърже с Facebook (Meta), който може да запише бисквитки.</p>
+              <button type="button" class="btn btn-dark" id="fb-load" hidden>Покажи публикациите</button>
+            </div>
           </div>
         </div>
+        <ol class="posts" id="posts" hidden></ol>
       </div>
     </section>
   </main>

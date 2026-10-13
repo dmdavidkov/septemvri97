@@ -4,3 +4,7 @@ Thumbs.db
 *.log
 .env
 .claude/
+
+# Copied from Facebook at publish time only; never committed (the repository is public).
+site/data/posts.json
+site/assets/fb/

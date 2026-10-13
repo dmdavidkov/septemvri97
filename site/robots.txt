@@ -1,4 +1,6 @@
 User-agent: *
 Allow: /
+# Photos copied from the club's Facebook posts stay out of image search.
+Disallow: /assets/fb/
 
 Sitemap: https://www.septemvri97.eu/sitemap.xml

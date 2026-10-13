@@ -4,7 +4,8 @@ on:
   # Every commit to main is tested and published.
   push:
     branches: [main]
-  # Every 3 hours from 05:15 to 20:15 UTC: fetch the BFB schedule, commit it if it changed, publish.
+  # Every 3 hours from 05:15 to 20:15 UTC: fetch the BFB schedule (committed if it changed) and the
+  # Facebook posts, then publish if either changed.
   schedule:
     - cron: '15 5-20/3 * * *'
   # "Run workflow" button in the Actions tab: refresh the schedule and publish now.
@@ -25,6 +26,8 @@ jobs:
     outputs:
       changed: ${{ steps.commit.outputs.changed }}
       scrape: ${{ steps.scrape.outcome }}
+      posts_changed: ${{ steps.posts.outputs.changed }}
+      posts: ${{ steps.posts.outcome }}
     steps:
       - uses: actions/checkout@v7
 
@@ -61,14 +64,22 @@ jobs:
           git push
           echo "changed=true" >> "$GITHUB_OUTPUT"
 
+      # Posts and their photos go only into the published site, never into the public repository.
+      - name: Copy the latest Facebook posts
+        id: posts
+        continue-on-error: true
+        env:
+          FB_PAGE_TOKEN: ${{ secrets.FB_PAGE_TOKEN }}
+        run: npm run posts
+
       - uses: actions/upload-pages-artifact@v5
-        if: github.event_name != 'schedule' || steps.commit.outputs.changed == 'true'
+        if: github.event_name != 'schedule' || steps.commit.outputs.changed == 'true' || steps.posts.outputs.changed == 'true'
         with:
           path: site
 
   deploy:
     needs: build
-    if: github.event_name != 'schedule' || needs.build.outputs.changed == 'true'
+    if: github.event_name != 'schedule' || needs.build.outputs.changed == 'true' || needs.build.outputs.posts_changed == 'true'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
@@ -81,9 +92,11 @@ jobs:
   # A red run here makes GitHub email the repo owner.
   report:
     needs: [build, deploy]
-    if: always() && needs.build.outputs.scrape == 'failure'
+    if: always() && (needs.build.outputs.scrape == 'failure' || needs.build.outputs.posts == 'failure')
     runs-on: ubuntu-latest
     steps:
-      - run: |
-          echo "::error::The BFB update failed for at least one team; its previous games were kept. See the 'Update the schedule from BFB' step."
-          exit 1
+      - if: needs.build.outputs.scrape == 'failure'
+        run: echo "::error::The BFB update failed for at least one team; its previous games were kept. See the 'Update the schedule from BFB' step."
+      - if: needs.build.outputs.posts == 'failure'
+        run: echo "::error::Facebook posts could not be fetched; the site kept the previous ones. If the token stopped working, create a new FB_PAGE_TOKEN (README)."
+      - run: exit 1

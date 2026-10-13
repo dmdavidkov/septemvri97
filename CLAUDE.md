@@ -9,11 +9,12 @@ Static site for БК Септември 97, a women's basketball club in Sofia. 
 - **The UI is Bulgarian** (`lang="bg"`). Always write the club's name as "Септември 97": another club, БК „Септември", shares the youth hall.
 - **Cause codes are ASCII**, matching `^[A-Z0-9-]{2,16}$`, because donors type them into bank transfer references.
 - **Privacy:**
-  - No photos or names of children.
+  - No photos or names of children. The only exception is the news cards, which mirror the club's own Facebook posts (the club decided this in October 2026).
+  - Facebook posts and their photos go only into the published site, never into commits. `robots.txt` keeps `assets/fb/` out of image search.
   - Never scrape BFB rosters, box scores or protocol PDFs.
   - Don't publish the club's registered seat address, which is a private flat.
   - Keep personal data out of commits, since history is public.
-  - Facebook loads only after the visitor clicks.
+  - Visitors' browsers never contact Facebook. The page plugin, a fallback for when there are no copied posts, loads only after the visitor clicks.
   - No analytics and no cookies.
 - **BFB scraping is gentle:** one request per team, game pages only when needed, 1 s between requests. A failing team keeps its previous games.
 - Update the tests in `test/` along with any parser change. Saved BFB pages live in `scraper/fixtures/`, trimmed so they contain no player data.

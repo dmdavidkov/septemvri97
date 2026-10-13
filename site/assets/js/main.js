@@ -1,11 +1,11 @@
 // Boot: load the BFB schedule and the Sheet tabs in parallel, render each section as its data arrives.
-// URL switches: ?demo uses the sample CSVs, ?check lists rows the site skipped (for the club's admins).
+// URL switches: ?demo uses the sample CSVs and posts, ?check lists rows the site skipped (for the club's admins).
 import config from './config.js';
 import { el, onVisible, reducedMotion } from './lib/dom.js';
 import { parseNeeds, parseGames } from './lib/sheet.js';
 import { createGames } from './games.js';
 import { initDonate } from './donate.js';
-import { initFacebook } from './fb.js';
+import { initNews } from './news.js';
 
 const params = new URLSearchParams(location.search);
 const demo = params.has('demo');
@@ -86,7 +86,7 @@ function wirePage() {
 }
 
 wirePage();
-initFacebook(config.facebookPage);
+initNews({ demo, pageUrl: config.facebookPage });
 
 const games = createGames();
 const gamesSource = tabSource('games', 'data/sample-games.csv');
