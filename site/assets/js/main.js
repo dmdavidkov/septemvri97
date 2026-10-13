@@ -2,9 +2,10 @@
 // URL switches: ?demo uses the sample CSVs and posts, ?check lists rows the site skipped (for the club's admins).
 import config from './config.js';
 import { el, onVisible, reducedMotion } from './lib/dom.js';
-import { parseNeeds, parseGames } from './lib/sheet.js';
+import { parseNeeds, parseGames, parsePackages } from './lib/sheet.js';
 import { createGames } from './games.js';
 import { initDonate } from './donate.js';
+import { initPartners } from './partners.js';
 import { initNews } from './news.js';
 
 const params = new URLSearchParams(location.search);
@@ -93,9 +94,15 @@ initNews({ demo, pageUrl: config.facebookPage });
 const games = createGames();
 const gamesSource = tabSource('games', 'data/sample-games.csv');
 const needsSource = tabSource('needs', 'data/sample-needs.csv');
+const packagesSource = tabSource('packages', 'data/sample-packages.csv');
 
 const needsDone = loadTab(needsSource, (text) => parseNeeds(text, { allowedHosts: config.payHosts })).then((result) => {
   initDonate({ config, needs: result.rows, notice: demo ? 'Показани са примерни каузи (?demo).' : '' });
+  return result;
+});
+
+const packagesDone = loadTab(packagesSource, (text) => parsePackages(text, { allowedHosts: config.payHosts })).then((result) => {
+  initPartners({ config, packages: result.rows });
   return result;
 });
 
@@ -119,6 +126,9 @@ const sheetGamesDone = Promise.all([bfbDone, gamesSource ? fetchText(gamesSource
   });
 
 if (check) {
-  Promise.all([needsDone, sheetGamesDone, bfbDone]).then(([needs, sheetGames]) =>
-    renderCheck([{ title: 'Таблица „Нужди“', result: needs }, { title: 'Таблица „Мачове“', result: sheetGames }], games));
+  Promise.all([needsDone, sheetGamesDone, packagesDone, bfbDone]).then(([needs, sheetGames, packages]) => renderCheck([
+    { title: 'Таблица „Нужди“', result: needs },
+    { title: 'Таблица „Мачове“', result: sheetGames },
+    { title: 'Таблица „Пакети“', result: packages },
+  ], games));
 }

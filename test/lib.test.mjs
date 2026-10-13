@@ -5,7 +5,7 @@ import {
   parseNumber, parseDate, parseTime, parseBool, parseScore, sofiaISO,
   checkPayUrl, checkLinkUrl, providerName, formatEuro, dateParts,
 } from '../site/assets/js/lib/values.js';
-import { parseNeeds, parseGames } from '../site/assets/js/lib/sheet.js';
+import { parseNeeds, parseGames, parsePackages } from '../site/assets/js/lib/sheet.js';
 
 const HOSTS = ['buy.stripe.com', 'www.paypal.com', 'paypal.me'];
 const TEAMS = [
@@ -166,4 +166,26 @@ test('games from the sheet', () => {
   assert.equal(rows[1].away.isUs, true);
   assert.deepEqual(rows[1].score, { home: 56, away: 69 });
   assert.deepEqual(errors.map((e) => e.row), [4, 5]);
+});
+
+test('packages: prices, one benefit per line, payment links, hidden and bad rows', () => {
+  const csv = [
+    'Покажи,Име,Цена,Какво получавате,Линк за плащане,Акцент',
+    'TRUE,Приятел,50,"- Името ви на сайта\n• Благодарност във Facebook\n\n",,',
+    'TRUE,Партньор,"1 000,00 €",Лого; Банер,https://buy.stripe.com/abc,',
+    'TRUE,Генерален спонсор,по договаряне,,https://evil.io/pay,TRUE',
+    'FALSE,Скрит,10,,,',
+    'TRUE,,10,Без име,,',
+  ].join('\n');
+  const { rows, errors } = parsePackages(csv, { allowedHosts: HOSTS });
+  assert.deepEqual(rows.map((r) => [r.name, r.price, r.amount, r.highlight]), [
+    ['Приятел', '50 €', true, false], ['Партньор', '1000 €', true, false], ['Генерален спонсор', 'по договаряне', false, true],
+  ]);
+  assert.deepEqual(rows[0].benefits, ['Името ви на сайта', 'Благодарност във Facebook']);
+  assert.deepEqual(rows[1].benefits, ['Лого', 'Банер']);
+  assert.equal(rows[1].pay.url, 'https://buy.stripe.com/abc?locale=bg');
+  assert.equal(rows[2].pay, null);
+  assert.deepEqual(errors.map((e) => [e.row, e.skipped]), [[4, false], [6, true]]);
+  assert.match(parsePackages('Цена\n10', { allowedHosts: HOSTS }).fatal, /Име/);
+  assert.deepEqual(parsePackages('Покажи,Име,Цена,Какво получавате,Линк за плащане,Акцент', { allowedHosts: HOSTS }), { rows: [], errors: [] });
 });

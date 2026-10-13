@@ -3,11 +3,13 @@
 import { parseCsv } from './csv.js';
 import {
   clean, normalizeKey, parseNumber, parseDate, parseTime, parseBool, parseScore,
-  sofiaISO, checkPayUrl, checkLinkUrl,
+  sofiaISO, checkPayUrl, checkLinkUrl, formatEuro,
 } from './values.js';
 
 const MAX_NEEDS = 30;
 const MAX_GAMES = 100;
+const MAX_PACKAGES = 8;
+const MAX_BENEFITS = 8;
 
 const NEEDS_COLUMNS = {
   show: 'Покажи',
@@ -46,6 +48,16 @@ const GAMES_COLUMNS = {
 };
 const GAMES_REQUIRED = ['team', 'date', 'home', 'away'];
 
+const PACKAGES_COLUMNS = {
+  show: 'Покажи',
+  name: 'Име',
+  price: 'Цена',
+  benefits: 'Какво получавате',
+  link: 'Линк за плащане',
+  highlight: 'Акцент',
+};
+const PACKAGES_REQUIRED = ['name'];
+
 const headerKey = (s) => normalizeKey(s).replace(/\s*\/\s*/g, '/');
 
 function truncate(s, max) {
@@ -77,7 +89,9 @@ function readTable(text, columns, required) {
     const r = rows[i];
     if (!r.some((c) => clean(c))) continue;
     const get = (field) => (field in index ? clean(r[index[field]]) : '');
-    records.push({ rowNumber: i + 1, get });
+    // With line breaks, for cells that hold a list.
+    const raw = (field) => (field in index ? String(r[index[field]] ?? '') : '');
+    records.push({ rowNumber: i + 1, get, raw });
   }
   return { records };
 }
@@ -214,6 +228,52 @@ export function parseGames(text, { teams, clubNames, linkDomains }) {
       score,
       liveUrl: null,
       url,
+    });
+  }
+  return { rows, errors };
+}
+
+// "1000", "1 000 €" or "1000,00 €" becomes "1000 €" (amount); other text ("по договаряне", "от 500 €")
+// stays as typed.
+function price(s) {
+  if (/^[\d\s.,]+(€|евро|eur)?$/i.test(s)) {
+    const n = parseNumber(s);
+    if (n !== null) return { price: formatEuro(n), amount: true };
+  }
+  return { price: truncate(s, 40), amount: false };
+}
+
+export function parsePackages(text, { allowedHosts }) {
+  const { fatal, records } = readTable(text, PACKAGES_COLUMNS, PACKAGES_REQUIRED);
+  if (fatal) return { rows: [], errors: [], fatal };
+
+  const rows = [];
+  const errors = [];
+  for (const { rowNumber, get, raw } of records) {
+    const problem = (message, skipped = true) => errors.push({ row: rowNumber, message, skipped });
+    if (!parseBool(get('show'), true)) continue;
+
+    const name = get('name');
+    if (!name) { problem('Липсва име.'); continue; }
+    if (rows.length >= MAX_PACKAGES) { problem(`Показват се най-много ${MAX_PACKAGES} пакета.`); continue; }
+
+    // One benefit per line in the cell (Ctrl+Enter), or separated by ";". Bullets typed in front are dropped.
+    const benefits = raw('benefits').split(/[\n;]/).map((line) => clean(line).replace(/^[-–•*·]\s*/, '')).filter(Boolean);
+    if (benefits.length > MAX_BENEFITS) problem(`Показват се първите ${MAX_BENEFITS} реда от „${PACKAGES_COLUMNS.benefits}“.`, false);
+
+    let pay = null;
+    if (get('link')) {
+      const check = checkPayUrl(get('link'), allowedHosts);
+      if (check.ok) pay = { url: check.url, host: check.host, placeholder: check.placeholder };
+      else problem('Линкът за плащане не е разрешен или е невалиден — показва се само „Пишете ни“.', false);
+    }
+
+    rows.push({
+      name: truncate(name, 60),
+      ...price(get('price')),
+      benefits: benefits.slice(0, MAX_BENEFITS).map((b) => truncate(b, 120)),
+      pay,
+      highlight: parseBool(get('highlight'), false),
     });
   }
   return { rows, errors };

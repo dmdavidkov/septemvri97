@@ -459,17 +459,26 @@ progress::-moz-progress-bar { background: linear-gradient(90deg, var(--red), var
 /* Four cards: one column, then 2 × 2, then one row – never three plus an orphan. */
 .tiers, .offers { display: grid; gap: 16px; margin: 36px 0 0; padding: 0; list-style: none; }
 @media (min-width: 600px) { .tiers, .offers { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (min-width: 1100px) { .tiers { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+/* Wide screens: one row for up to four packages (--tiers, set by partners.js); more wrap. */
+@media (min-width: 1100px) { .tiers { grid-template-columns: repeat(var(--tiers, 4), minmax(0, 1fr)); } }
 @media (min-width: 1000px) { .offers { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 .tier { display: flex; flex-direction: column; gap: 10px; padding: 26px 24px; border-radius: var(--radius); background: var(--white); box-shadow: var(--shadow); transition: transform .2s ease, box-shadow .2s ease; }
 .tier:hover { transform: translateY(-3px); box-shadow: var(--shadow-lift); }
 .tier h3 { font: 800 1.08rem/1.2 var(--font-display); letter-spacing: -.01em; }
 .price { margin: 0; color: var(--muted); }
 .price span { color: var(--text); font: 800 2rem/1.1 var(--font-display); letter-spacing: -.04em; }
+/* A price in words ("по договаряне") */
+.price.words span { font-size: 1.25rem; letter-spacing: -.02em; }
 .tier ul { display: grid; flex: 1; gap: 8px; margin: 6px 0 12px; padding: 0; list-style: none; font-size: .95rem; }
 .tier li { position: relative; padding-left: 22px; }
 .tier li::before { content: ''; position: absolute; left: 2px; top: .5em; width: 9px; height: 9px; border-radius: 50%; background: var(--red); }
 .tier .btn { align-self: flex-start; }
+.tier-hint { margin: -2px 0 0; font-size: .85rem; color: var(--muted); }
+.tiers-empty { display: grid; gap: 18px; margin-top: 36px; padding: 26px 24px; border-radius: var(--radius); background: var(--white); box-shadow: var(--shadow); }
+.tiers-empty h3 { margin: 0 0 6px; font: 800 1.08rem/1.2 var(--font-display); letter-spacing: -.01em; }
+.tiers-empty p { margin: 0; max-width: 46em; color: var(--muted); }
+.tiers-empty .btn { justify-self: start; }
+@media (min-width: 760px) { .tiers-empty { grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 32px; padding: 30px 34px; } }
 .tier-top { background: var(--ink) radial-gradient(80% 60% at 100% 0%, rgba(218, 22, 45, .45), transparent 70%); }
 .offers { margin-top: 0; }
 .offer { display: flex; flex-direction: column; gap: 8px; padding: 22px; border: 2px solid var(--line); border-radius: var(--radius); }
