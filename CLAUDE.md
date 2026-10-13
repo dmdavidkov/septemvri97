@@ -18,3 +18,8 @@ Static site for БК Септември 97, a women's basketball club in Sofia. 
 - **BFB scraping is gentle:** one request per team, game pages only when needed, 1 s between requests. A failing team keeps its previous games.
 - Update the tests in `test/` along with any parser change. Saved BFB pages live in `scraper/fixtures/`, trimmed so they contain no player data.
 - Times are Europe/Sofia. `start` is ISO with the Sofia offset (`sofiaISO`), and the UI shows the stored `date` and `time` as they are.
+
+## Maintenance
+
+- Every new season BFB gives teams new IDs. Find each team on comps.basketball.bg (the club's pages end in `-septemvri-97`), update `tId` and `page` in `scraper/teams.json`, and run `npm run scrape`.
+- GitHub turns off the scheduled workflow after 60 days without commits, which can happen over the summer. Before the season: Actions → "Site" → Enable workflow, then Run workflow.
