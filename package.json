@@ -1,0 +1,17 @@
+{
+  "name": "septemvri97-site",
+  "private": true,
+  "description": "Сайт на БК Септември 97 – septemvri97.eu",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "node --test",
+    "scrape": "node scraper/scrape.mjs",
+    "serve": "node scripts/serve.mjs"
+  },
+  "dependencies": {
+    "cheerio": "^1.2.0"
+  }
+}

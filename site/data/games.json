@@ -1,0 +1,1539 @@
+{
+  "updated": "2026-10-13T08:32:14.904Z",
+  "teams": [
+    {
+      "key": "women",
+      "label": "Жени",
+      "short": "Жени",
+      "bfbUrl": "https://comps.basketball.bg/team-1890-septemvri-97"
+    },
+    {
+      "key": "u19",
+      "label": "Девойки U19",
+      "short": "U19",
+      "bfbUrl": "https://comps.basketball.bg/team-3672-septemvri-97"
+    },
+    {
+      "key": "u17",
+      "label": "Девойки U17 · WABA",
+      "short": "U17",
+      "bfbUrl": null
+    },
+    {
+      "key": "u16",
+      "label": "Девойки U16",
+      "short": "U16",
+      "bfbUrl": "https://comps.basketball.bg/team-548-septemvri-97"
+    },
+    {
+      "key": "u15",
+      "label": "Девойки U15",
+      "short": "U15",
+      "bfbUrl": "https://comps.basketball.bg/team-3775-septemvri-97"
+    },
+    {
+      "key": "u14",
+      "label": "Момичета U14",
+      "short": "U14",
+      "bfbUrl": "https://comps.basketball.bg/team-546-septemvri-97"
+    },
+    {
+      "key": "u13",
+      "label": "Момичета U13",
+      "short": "U13",
+      "bfbUrl": "https://comps.basketball.bg/team-3143-septemvri-97"
+    },
+    {
+      "key": "u12",
+      "label": "Момичета U12",
+      "short": "U12",
+      "bfbUrl": "https://comps.basketball.bg/team-544-septemvri-97"
+    }
+  ],
+  "games": [
+    {
+      "id": "bfb-384686",
+      "source": "bfb",
+      "team": "women",
+      "competition": "А група Жени",
+      "phase": "Редовен сезон",
+      "round": 1,
+      "date": "2026-10-10",
+      "time": "18:00",
+      "start": "2026-10-10T18:00:00+03:00",
+      "venue": "Триадица - София",
+      "home": {
+        "name": "Славия 1913",
+        "logo": "assets/logos/bfb/teams-20260812114912.jpg",
+        "isUs": false
+      },
+      "away": {
+        "name": "Септември 97",
+        "logo": "assets/logos/bfb/clubs-20250725084541.jpg",
+        "isUs": true
+      },
+      "score": {
+        "home": 70,
+        "away": 77
+      },
+      "liveUrl": "https://tv.basketball.bg/index.php?i_id=384686",
+      "url": "https://comps.basketball.bg/game-384686"
+    },
+    {
+      "id": "bfb-385155",
+      "source": "bfb",
+      "team": "u16",
+      "competition": "Девойки 16г.",
+      "phase": "Елитна група ЗАПАД",
+      "round": 1,
+      "date": "2026-10-11",
+      "time": "10:00",
+      "start": "2026-10-11T10:00:00+03:00",
+      "venue": "Арена Самоков - Самоков",
+      "home": {
+        "name": "Рилски спортист",
+        "logo": "assets/logos/bfb/clubs-20250527185844.png",
+        "isUs": false
+      },
+      "away": {
+        "name": "Септември 97",
+        "logo": "assets/logos/bfb/clubs-20250725084541.jpg",
+        "isUs": true
+      },
+      "score": {
+        "home": 31,
+        "away": 88
+      },
+      "liveUrl": "https://tv.basketball.bg/index.php?i_id=385155",
+      "url": "https://comps.basketball.bg/game-385155"
+    },
+    {
+      "id": "bfb-385224",
+      "source": "bfb",
+      "team": "u12",
+      "competition": "Момичета 12г.",
+      "phase": "Северозапад - група Б",
+      "round": 1,
+      "date": "2026-10-11",
+      "time": "10:45",
+      "start": "2026-10-11T10:45:00+03:00",
+      "venue": "ст. Локомотив - София",
+      "home": {
+        "name": "Септември 97",
+        "logo": "assets/logos/bfb/clubs-20250725084541.jpg",
+        "isUs": true
+      },
+      "away": {
+        "name": "Монтана 2003",
+        "logo": "assets/logos/bfb/clubs-20170210232847.jpg",
+        "isUs": false
+      },
+      "score": {
+        "home": 65,
+        "away": 15
+      },
+      "liveUrl": "https://tv.basketball.bg/index.php?i_id=385224",
+      "url": "https://comps.basketball.bg/game-385224"
+    },
+    {
+      "id": "bfb-384690",
+      "source": "bfb",
+      "team": "women",
+      "competition": "А група Жени",
+      "phase": "Редовен сезон",
+      "round": 2,
+      "date": "2026-10-17",
+      "time": "16:00",
+      "start": "2026-10-17T16:00:00+03:00",
+      "venue": "Триадица - София",
+      "home": {
+        "name": "Септември 97",
+        "logo": "assets/logos/bfb/clubs-20250725084541.jpg",
+        "isUs": true
+      },
+      "away": {
+        "name": "Рилски спортист",
+        "logo": "assets/logos/bfb/clubs-20250527185844.png",
+        "isUs": false
+      },
+      "score": null,
+      "liveUrl": null,
+      "url": "https://comps.basketball.bg/game-384690"
+    },
+    {
+      "id": "bfb-385069",
+      "source": "bfb",
+      "team": "u14",
+      "competition": "Момичета 14г.",
+      "phase": "Елитна група ЗАПАД",
+      "round": 4,
+      "date": "2026-10-18",
+      "time": "11:00",
+      "start": "2026-10-18T11:00:00+03:00",
+      "venue": "Локомотив - Варна",
+      "home": {
+        "name": "Локомотив София",
+        "logo": "assets/logos/bfb/clubs-20251114115816.png",
+        "isUs": false
+      },
+      "away": {
+        "name": "Септември 97",
+        "logo": "assets/logos/bfb/clubs-20250725084541.jpg",
+        "isUs": true
+      },
+      "score": null,
+      "liveUrl": null,
+      "url": "https://comps.basketball.bg/game-385069"
+    },
+    {
+      "id": "bfb-385124",
+      "source": "bfb",
+      "team": "u19",
+      "competition": "Девойки 19г.",
+      "phase": "Елитна група ЗАПАД",
+      "round": 1,
+      "date": "2026-10-22",
+      "time": "17:00",
+      "start": "2026-10-22T17:00:00+03:00",
+      "venue": "Арена СамЕЛион - Самоков",
+      "home": {
+        "name": "Рилски спортист",
+        "logo": "assets/logos/bfb/clubs-20250527185844.png",
+        "isUs": false
+      },
+      "away": {
+        "name": "Септември 97",
+        "logo": "assets/logos/bfb/clubs-20250725084541.jpg",
+        "isUs": true
+      },
+      "score": null,
+      "liveUrl": null,
+      "url": "https://comps.basketball.bg/game-385124"
+    },
+    {
+      "id": "bfb-385389",
+      "source": "bfb",
+      "team": "u15",
+      "competition": "Девойки 15г.",
+      "phase": "ЗАПАД",
+      "round": 2,
+      "date": "2026-10-24",
+      "time": "10:00",
+      "start": "2026-10-24T10:00:00+03:00",
+      "venue": null,
+      "home": {
+        "name": "Рилски спортист",
+        "logo": "assets/logos/bfb/clubs-20250527185844.png",
+        "isUs": false
+      },
+      "away": {
+        "name": "Септември 97",
+        "logo": "assets/logos/bfb/clubs-20250725084541.jpg",
+        "isUs": true
+      },
+      "score": null,
+      "liveUrl": null,
+      "url": "https://comps.basketball.bg/game-385389"
+    },
+    {
+      "id": "bfb-385158",
+      "source": "bfb",
+      "team": "u16",
+      "competition": "Девойки 16г.",
+      "phase": "Елитна група ЗАПАД",
+      "round": 2,
+      "date": "2026-10-25",
+      "time": "14:30",
+      "start": "2026-10-25T14:30:00+02:00",
+      "venue": "Септември - София",
+      "home": {
+        "name": "Септември 97",
+        "logo": "assets/logos/bfb/clubs-20250725084541.jpg",
+        "isUs": true
+      },
+      "away": {
+        "name": "НСА",
+        "logo": "assets/logos/bfb/clubs-20250724175934.jpg",
+        "isUs": false
+      },
+      "score": null,
+      "liveUrl": null,
+      "url": "https://comps.basketball.bg/game-385158"
+    },
+    {
+      "id": "bfb-384778",
+      "source": "bfb",
+      "team": "women",
+      "competition": "А група Жени",
+      "phase": "Редовен сезон",
+      "round": 3,
+      "date": "2026-10-26",
+      "time": "18:00",
+      "start": "2026-10-26T18:00:00+02:00",
+      "venue": "Общинска - Стара Загора",
+      "home": {
+        "name": "Берое-Стара Загора",
+        "logo": "assets/logos/bfb/clubs-20250527185704.png",
+        "isUs": false
+      },
+      "away": {
+        "name": "Септември 97",
+        "logo": "assets/logos/bfb/clubs-20250725084541.jpg",
+        "isUs": true
+      },
+      "score": null,
+      "liveUrl": null,
+      "url": "https://comps.basketball.bg/game-384778"
+    },
+    {
+      "id": "bfb-385126",
+      "source": "bfb",
+      "team": "u19",
+      "competition": "Девойки 19г.",
+      "phase": "Елитна група ЗАПАД",
+      "round": 2,
+      "date": "2026-10-29",
+      "time": "18:30",
+      "start": "2026-10-29T18:30:00+02:00",
+      "venue": "Септември - София",
+      "home": {
+        "name": "Септември 97",
+        "logo": "assets/logos/bfb/clubs-20250725084541.jpg",
+        "isUs": true
+      },
+      "away": {
+        "name": "Шампион 2006",
+        "logo": "assets/logos/bfb/clubs-20170606132219.jpg",
+        "isUs": false
+      },
+      "score": null,
+      "liveUrl": null,
+      "url": "https://comps.basketball.bg/game-385126"
+    },
+    {
+      "id": "bfb-384791",
+      "source": "bfb",
+      "team": "women",
+      "competition": "А група Жени",
+      "phase": "Редовен сезон",
+      "round": 4,
+      "date": "2026-10-31",
+      "time": "16:00",
+      "start": "2026-10-31T16:00:00+02:00",
+      "venue": "Триадица - София",
+      "home": {
+        "name": "Септември 97",
+        "logo": "assets/logos/bfb/clubs-20250725084541.jpg",
+        "isUs": true
+      },
+      "away": {
+        "name": "Локомотив София",
+        "logo": "assets/logos/bfb/clubs-20251114115816.png",
+        "isUs": false
+      },
+      "score": null,
+      "liveUrl": null,
+      "url": "https://comps.basketball.bg/game-384791"
+    },
+    {
+      "id": "bfb-384793",
+      "source": "bfb",
+      "team": "women",
+      "competition": "А група Жени",
+      "phase": "Редовен сезон",
+      "round": 5,
+      "date": "2026-11-06",
+      "time": "14:00",
+      "start": "2026-11-06T14:00:00+02:00",
+      "venue": "Младост - Монтана - Монтана",
+      "home": {
+        "name": "Монтана 2003",
+        "logo": "assets/logos/bfb/teams-20251017104021.png",
+        "isUs": false
+      },
+      "away": {
+        "name": "Септември 97",
+        "logo": "assets/logos/bfb/clubs-20250725084541.jpg",
+        "isUs": true
+      },
+      "score": null,
+      "liveUrl": null,
+      "url": "https://comps.basketball.bg/game-384793"
+    },
+    {
+      "id": "bfb-385391",
+      "source": "bfb",
+      "team": "u15",
+      "competition": "Девойки 15г.",
+      "phase": "ЗАПАД",
+      "round": 3,
+      "date": "2026-11-07",
+      "time": "10:00",
+      "start": "2026-11-07T10:00:00+02:00",
+      "venue": null,
+      "home": {
+        "name": "Септември 97",
+        "logo": "assets/logos/bfb/clubs-20250725084541.jpg",
+        "isUs": true
+      },
+      "away": {
+        "name": "ЦСКА",
+        "logo": "assets/logos/bfb/clubs-20260812154705.png",
+        "isUs": false
+      },
+      "score": null,
+      "liveUrl": null,
+      "url": "https://comps.basketball.bg/game-385391"
+    },
+    {
+      "id": "bfb-385161",
+      "source": "bfb",
+      "team": "u16",
+      "competition": "Девойки 16г.",
+      "phase": "Елитна група ЗАПАД",
+      "round": 3,
+      "date": "2026-11-08",
+      "time": "10:00",
+      "start": "2026-11-08T10:00:00+02:00",
+      "venue": null,
+      "home": {
+        "name": "ЦСКА",
+        "logo": "assets/logos/bfb/clubs-20260812154705.png",
+        "isUs": false
+      },
+      "away": {
+        "name": "Септември 97",
+        "logo": "assets/logos/bfb/clubs-20250725084541.jpg",
+        "isUs": true
+      },
+      "score": null,
+      "liveUrl": null,
+      "url": "https://comps.basketball.bg/game-385161"
+    },
+    {
+      "id": "bfb-385227",
+      "source": "bfb",
+      "team": "u12",
+      "competition": "Момичета 12г.",
+      "phase": "Северозапад - група Б",
+      "round": 3,
+      "date": "2026-11-08",
+      "time": "10:00",
+      "start": "2026-11-08T10:00:00+02:00",
+      "venue": "Северозапад - група Б",
+      "home": {
+        "name": "Боец - Божурище",
+        "logo": "assets/logos/bfb/clubs-20250731164408.png",
+        "isUs": false
+      },
+      "away": {
+        "name": "Септември 97",
+        "logo": "assets/logos/bfb/clubs-20250725084541.jpg",
+        "isUs": true
+      },
+      "score": null,
+      "liveUrl": null,
+      "url": "https://comps.basketball.bg/game-385227"
+    },
+    {
+      "id": "bfb-385128",
+      "source": "bfb",
+      "team": "u19",
+      "competition": "Девойки 19г.",
+      "phase": "Елитна група ЗАПАД",
+      "round": 3,
+      "date": "2026-11-12",
+      "time": "18:30",
+      "start": "2026-11-12T18:30:00+02:00",
+      "venue": "Септември - София",
+      "home": {
+        "name": "Септември 97",
+        "logo": "assets/logos/bfb/clubs-20250725084541.jpg",
+        "isUs": true
+      },
+      "away": {
+        "name": "Локомотив София",
+        "logo": "assets/logos/bfb/clubs-20251114115816.png",
+        "isUs": false
+      },
+      "score": null,
+      "liveUrl": null,
+      "url": "https://comps.basketball.bg/game-385128"
+    },
+    {
+      "id": "bfb-385093",
+      "source": "bfb",
+      "team": "u13",
+      "competition": "Момичета 13г.",
+      "phase": "ЗАПАД",
+      "round": 1,
+      "date": "2026-11-14",
+      "time": "10:00",
+      "start": "2026-11-14T10:00:00+02:00",
+      "venue": null,
+      "home": {
+        "name": "Рилски спортист",
+        "logo": "assets/logos/bfb/clubs-20250527185844.png",
+        "isUs": false
+      },
+      "away": {
+        "name": "Септември 97",
+        "logo": "assets/logos/bfb/clubs-20250725084541.jpg",
+        "isUs": true
+      },
+      "score": null,
+      "liveUrl": null,
+      "url": "https://comps.basketball.bg/game-385093"
+    },
+    {
+      "id": "bfb-385120",
+      "source": "bfb",
+      "team": "u13",
+      "competition": "Момичета 13г.",
+      "phase": "ЗАПАД",
+      "round": 1,
+      "date": "2026-11-14",
+      "time": "10:00",
+      "start": "2026-11-14T10:00:00+02:00",
+      "venue": null,
+      "home": {
+        "name": "Септември 97",
+        "logo": "assets/logos/bfb/clubs-20250725084541.jpg",
+        "isUs": true
+      },
+      "away": {
+        "name": "Спортист 1959",
+        "logo": "assets/logos/bfb/clubs-20210826142301.png",
+        "isUs": false
+      },
+      "score": null,
+      "liveUrl": null,
+      "url": "https://comps.basketball.bg/game-385120"
+    },
+    {
+      "id": "bfb-385065",
+      "source": "bfb",
+      "team": "u14",
+      "competition": "Момичета 14г.",
+      "phase": "Елитна група ЗАПАД",
+      "round": 3,
+      "date": "2026-11-15",
+      "time": "16:15",
+      "start": "2026-11-15T16:15:00+02:00",
+      "venue": "Септември - София",
+      "home": {
+        "name": "Септември 97",
+        "logo": "assets/logos/bfb/clubs-20250725084541.jpg",
+        "isUs": true
+      },
+      "away": {
+        "name": "Ахил",
+        "logo": "assets/logos/bfb/clubs-20130916110018.jpg",
+        "isUs": false
+      },
+      "score": null,
+      "liveUrl": null,
+      "url": "https://comps.basketball.bg/game-385065"
+    },
+    {
+      "id": "bfb-385164",
+      "source": "bfb",
+      "team": "u16",
+      "competition": "Девойки 16г.",
+      "phase": "Елитна група ЗАПАД",
+      "round": 4,
+      "date": "2026-11-22",
+      "time": "10:00",
+      "start": "2026-11-22T10:00:00+02:00",
+      "venue": null,
+      "home": {
+        "name": "Локомотив София",
+        "logo": "assets/logos/bfb/clubs-20251114115816.png",
+        "isUs": false
+      },
+      "away": {
+        "name": "Септември 97",
+        "logo": "assets/logos/bfb/clubs-20250725084541.jpg",
+        "isUs": true
+      },
+      "score": null,
+      "liveUrl": null,
+      "url": "https://comps.basketball.bg/game-385164"
+    },
+    {
+      "id": "bfb-385229",
+      "source": "bfb",
+      "team": "u12",
+      "competition": "Момичета 12г.",
+      "phase": "Северозапад - група Б",
+      "round": 4,
+      "date": "2026-11-22",
+      "time": "14:30",
+      "start": "2026-11-22T14:30:00+02:00",
+      "venue": "Септември - София",
+      "home": {
+        "name": "Септември 97",
+        "logo": "assets/logos/bfb/clubs-20250725084541.jpg",
+        "isUs": true
+      },
+      "away": {
+        "name": "Локомотив София",
+        "logo": "assets/logos/bfb/clubs-20251114115816.png",
+        "isUs": false
+      },
+      "score": null,
+      "liveUrl": null,
+      "url": "https://comps.basketball.bg/game-385229"
+    },
+    {
+      "id": "bfb-385132",
+      "source": "bfb",
+      "team": "u19",
+      "competition": "Девойки 19г.",
+      "phase": "Елитна група ЗАПАД",
+      "round": 4,
+      "date": "2026-11-26",
+      "time": "17:00",
+      "start": "2026-11-26T17:00:00+02:00",
+      "venue": null,
+      "home": {
+        "name": "НСА",
+        "logo": "assets/logos/bfb/clubs-20250724175934.jpg",
+        "isUs": false
+      },
+      "away": {
+        "name": "Септември 97",
+        "logo": "assets/logos/bfb/clubs-20250725084541.jpg",
+        "isUs": true
+      },
+      "score": null,
+      "liveUrl": null,
+      "url": "https://comps.basketball.bg/game-385132"
+    },
+    {
+      "id": "bfb-384799",
+      "source": "bfb",
+      "team": "women",
+      "competition": "А група Жени",
+      "phase": "Редовен сезон",
+      "round": 7,
+      "date": "2026-11-28",
+      "time": "14:00",
+      "start": "2026-11-28T14:00:00+02:00",
+      "venue": "Триадица - София",
+      "home": {
+        "name": "Септември 97",
+        "logo": "assets/logos/bfb/clubs-20250725084541.jpg",
+        "isUs": true
+      },
+      "away": {
+        "name": "Шампион 2006",
+        "logo": "assets/logos/bfb/clubs-20170606132219.jpg",
+        "isUs": false
+      },
+      "score": null,
+      "liveUrl": null,
+      "url": "https://comps.basketball.bg/game-384799"
+    },
+    {
+      "id": "bfb-385061",
+      "source": "bfb",
+      "team": "u14",
+      "competition": "Момичета 14г.",
+      "phase": "Елитна група ЗАПАД",
+      "round": 1,
+      "date": "2026-11-29",
+      "time": "10:00",
+      "start": "2026-11-29T10:00:00+02:00",
+      "venue": null,
+      "home": {
+        "name": "Рилски спортист",
+        "logo": "assets/logos/bfb/clubs-20250527185844.png",
+        "isUs": false
+      },
+      "away": {
+        "name": "Септември 97",
+        "logo": "assets/logos/bfb/clubs-20250725084541.jpg",
+        "isUs": true
+      },
+      "score": null,
+      "liveUrl": null,
+      "url": "https://comps.basketball.bg/game-385061"
+    },
+    {
+      "id": "bfb-384803",
+      "source": "bfb",
+      "team": "women",
+      "competition": "А група Жени",
+      "phase": "Редовен сезон",
+      "round": 8,
+      "date": "2026-12-04",
+      "time": "16:30",
+      "start": "2026-12-04T16:30:00+02:00",
+      "venue": "Триадица - София",
+      "home": {
+        "name": "Септември 97",
+        "logo": "assets/logos/bfb/clubs-20250725084541.jpg",
+        "isUs": true
+      },
+      "away": {
+        "name": "Славия 1913",
+        "logo": "assets/logos/bfb/teams-20260812114912.jpg",
+        "isUs": false
+      },
+      "score": null,
+      "liveUrl": null,
+      "url": "https://comps.basketball.bg/game-384803"
+    },
+    {
+      "id": "bfb-385096",
+      "source": "bfb",
+      "team": "u13",
+      "competition": "Момичета 13г.",
+      "phase": "ЗАПАД",
+      "round": 2,
+      "date": "2026-12-05",
+      "time": "10:00",
+      "start": "2026-12-05T10:00:00+02:00",
+      "venue": null,
+      "home": {
+        "name": "Септември 97",
+        "logo": "assets/logos/bfb/clubs-20250725084541.jpg",
+        "isUs": true
+      },
+      "away": {
+        "name": "Локомотив София",
+        "logo": "assets/logos/bfb/clubs-20251114115816.png",
+        "isUs": false
+      },
+      "score": null,
+      "liveUrl": null,
+      "url": "https://comps.basketball.bg/game-385096"
+    },
+    {
+      "id": "bfb-385397",
+      "source": "bfb",
+      "team": "u15",
+      "competition": "Девойки 15г.",
+      "phase": "ЗАПАД",
+      "round": 5,
+      "date": "2026-12-05",
+      "time": "10:00",
+      "start": "2026-12-05T10:00:00+02:00",
+      "venue": null,
+      "home": {
+        "name": "Шампион 2006",
+        "logo": "assets/logos/bfb/clubs-20170606132219.jpg",
+        "isUs": false
+      },
+      "away": {
+        "name": "Септември 97",
+        "logo": "assets/logos/bfb/clubs-20250725084541.jpg",
+        "isUs": true
+      },
+      "score": null,
+      "liveUrl": null,
+      "url": "https://comps.basketball.bg/game-385397"
+    },
+    {
+      "id": "bfb-385232",
+      "source": "bfb",
+      "team": "u12",
+      "competition": "Момичета 12г.",
+      "phase": "Северозапад - група Б",
+      "round": 5,
+      "date": "2026-12-06",
+      "time": "10:00",
+      "start": "2026-12-06T10:00:00+02:00",
+      "venue": "Северозапад - група Б",
+      "home": {
+        "name": "Славия-1921-1",
+        "logo": "assets/logos/bfb/clubs-20250801105430.jpg",
+        "isUs": false
+      },
+      "away": {
+        "name": "Септември 97",
+        "logo": "assets/logos/bfb/clubs-20250725084541.jpg",
+        "isUs": true
+      },
+      "score": null,
+      "liveUrl": null,
+      "url": "https://comps.basketball.bg/game-385232"
+    },
+    {
+      "id": "bfb-385136",
+      "source": "bfb",
+      "team": "u19",
+      "competition": "Девойки 19г.",
+      "phase": "Елитна група ЗАПАД",
+      "round": 5,
+      "date": "2026-12-10",
+      "time": "18:30",
+      "start": "2026-12-10T18:30:00+02:00",
+      "venue": "Септември - София",
+      "home": {
+        "name": "Септември 97",
+        "logo": "assets/logos/bfb/clubs-20250725084541.jpg",
+        "isUs": true
+      },
+      "away": {
+        "name": "Славия-1921",
+        "logo": "assets/logos/bfb/clubs-20250801105430.jpg",
+        "isUs": false
+      },
+      "score": null,
+      "liveUrl": null,
+      "url": "https://comps.basketball.bg/game-385136"
+    },
+    {
+      "id": "bfb-384807",
+      "source": "bfb",
+      "team": "women",
+      "competition": "А група Жени",
+      "phase": "Редовен сезон",
+      "round": 9,
+      "date": "2026-12-12",
+      "time": "15:30",
+      "start": "2026-12-12T15:30:00+02:00",
+      "venue": "Арена СамЕЛион - Самоков",
+      "home": {
+        "name": "Рилски спортист",
+        "logo": "assets/logos/bfb/clubs-20250527185844.png",
+        "isUs": false
+      },
+      "away": {
+        "name": "Септември 97",
+        "logo": "assets/logos/bfb/clubs-20250725084541.jpg",
+        "isUs": true
+      },
+      "score": null,
+      "liveUrl": null,
+      "url": "https://comps.basketball.bg/game-384807"
+    },
+    {
+      "id": "bfb-385073",
+      "source": "bfb",
+      "team": "u14",
+      "competition": "Момичета 14г.",
+      "phase": "Елитна група ЗАПАД",
+      "round": 5,
+      "date": "2026-12-13",
+      "time": "10:00",
+      "start": "2026-12-13T10:00:00+02:00",
+      "venue": null,
+      "home": {
+        "name": "Септември 97",
+        "logo": "assets/logos/bfb/clubs-20250725084541.jpg",
+        "isUs": true
+      },
+      "away": {
+        "name": "Славия-1921",
+        "logo": "assets/logos/bfb/clubs-20250801105430.jpg",
+        "isUs": false
+      },
+      "score": null,
+      "liveUrl": null,
+      "url": "https://comps.basketball.bg/game-385073"
+    },
+    {
+      "id": "bfb-384810",
+      "source": "bfb",
+      "team": "women",
+      "competition": "А група Жени",
+      "phase": "Редовен сезон",
+      "round": 10,
+      "date": "2026-12-19",
+      "time": "16:00",
+      "start": "2026-12-19T16:00:00+02:00",
+      "venue": "Триадица - София",
+      "home": {
+        "name": "Септември 97",
+        "logo": "assets/logos/bfb/clubs-20250725084541.jpg",
+        "isUs": true
+      },
+      "away": {
+        "name": "Берое-Стара Загора",
+        "logo": "assets/logos/bfb/clubs-20250527185704.png",
+        "isUs": false
+      },
+      "score": null,
+      "liveUrl": null,
+      "url": "https://comps.basketball.bg/game-384810"
+    },
+    {
+      "id": "bfb-384812",
+      "source": "bfb",
+      "team": "women",
+      "competition": "А група Жени",
+      "phase": "Редовен сезон",
+      "round": 11,
+      "date": "2027-01-04",
+      "time": "16:00",
+      "start": "2027-01-04T16:00:00+02:00",
+      "venue": "Триадица - София",
+      "home": {
+        "name": "Локомотив София",
+        "logo": "assets/logos/bfb/clubs-20251114115816.png",
+        "isUs": false
+      },
+      "away": {
+        "name": "Септември 97",
+        "logo": "assets/logos/bfb/clubs-20250725084541.jpg",
+        "isUs": true
+      },
+      "score": null,
+      "liveUrl": null,
+      "url": "https://comps.basketball.bg/game-384812"
+    },
+    {
+      "id": "bfb-385992",
+      "source": "bfb",
+      "team": "u13",
+      "competition": "Момичета 13г.",
+      "phase": "ЗАПАД",
+      "round": 3,
+      "date": "2027-01-09",
+      "time": "10:00",
+      "start": "2027-01-09T10:00:00+02:00",
+      "venue": null,
+      "home": {
+        "name": "Септември 97",
+        "logo": "assets/logos/bfb/clubs-20250725084541.jpg",
+        "isUs": true
+      },
+      "away": {
+        "name": "Славия 1921",
+        "logo": "assets/logos/bfb/clubs-20250801105430.jpg",
+        "isUs": false
+      },
+      "score": null,
+      "liveUrl": null,
+      "url": "https://comps.basketball.bg/game-385992"
+    },
+    {
+      "id": "bfb-385994",
+      "source": "bfb",
+      "team": "u13",
+      "competition": "Момичета 13г.",
+      "phase": "ЗАПАД",
+      "round": 3,
+      "date": "2027-01-09",
+      "time": "10:00",
+      "start": "2027-01-09T10:00:00+02:00",
+      "venue": null,
+      "home": {
+        "name": "Пирин Гоце Делчев",
+        "logo": "assets/logos/bfb/clubs-20191126134026.jpg",
+        "isUs": false
+      },
+      "away": {
+        "name": "Септември 97",
+        "logo": "assets/logos/bfb/clubs-20250725084541.jpg",
+        "isUs": true
+      },
+      "score": null,
+      "liveUrl": null,
+      "url": "https://comps.basketball.bg/game-385994"
+    },
+    {
+      "id": "bfb-384814",
+      "source": "bfb",
+      "team": "women",
+      "competition": "А група Жени",
+      "phase": "Редовен сезон",
+      "round": 12,
+      "date": "2027-01-09",
+      "time": "16:00",
+      "start": "2027-01-09T16:00:00+02:00",
+      "venue": "Триадица - София",
+      "home": {
+        "name": "Септември 97",
+        "logo": "assets/logos/bfb/clubs-20250725084541.jpg",
+        "isUs": true
+      },
+      "away": {
+        "name": "Монтана 2003",
+        "logo": "assets/logos/bfb/teams-20251017104021.png",
+        "isUs": false
+      },
+      "score": null,
+      "liveUrl": null,
+      "url": "https://comps.basketball.bg/game-384814"
+    },
+    {
+      "id": "bfb-385076",
+      "source": "bfb",
+      "team": "u14",
+      "competition": "Момичета 14г.",
+      "phase": "Елитна група ЗАПАД",
+      "round": 6,
+      "date": "2027-01-10",
+      "time": "10:00",
+      "start": "2027-01-10T10:00:00+02:00",
+      "venue": null,
+      "home": {
+        "name": "Септември 97",
+        "logo": "assets/logos/bfb/clubs-20250725084541.jpg",
+        "isUs": true
+      },
+      "away": {
+        "name": "Рилски спортист",
+        "logo": "assets/logos/bfb/clubs-20250527185844.png",
+        "isUs": false
+      },
+      "score": null,
+      "liveUrl": null,
+      "url": "https://comps.basketball.bg/game-385076"
+    },
+    {
+      "id": "bfb-385401",
+      "source": "bfb",
+      "team": "u15",
+      "competition": "Девойки 15г.",
+      "phase": "ЗАПАД",
+      "round": 6,
+      "date": "2027-01-16",
+      "time": "10:00",
+      "start": "2027-01-16T10:00:00+02:00",
+      "venue": null,
+      "home": {
+        "name": "Славия-1921",
+        "logo": "assets/logos/bfb/clubs-20250801105430.jpg",
+        "isUs": false
+      },
+      "away": {
+        "name": "Септември 97",
+        "logo": "assets/logos/bfb/clubs-20250725084541.jpg",
+        "isUs": true
+      },
+      "score": null,
+      "liveUrl": null,
+      "url": "https://comps.basketball.bg/game-385401"
+    },
+    {
+      "id": "bfb-385174",
+      "source": "bfb",
+      "team": "u16",
+      "competition": "Девойки 16г.",
+      "phase": "Елитна група ЗАПАД",
+      "round": 6,
+      "date": "2027-01-17",
+      "time": "10:00",
+      "start": "2027-01-17T10:00:00+02:00",
+      "venue": null,
+      "home": {
+        "name": "Шампион 2006",
+        "logo": "assets/logos/bfb/clubs-20170606132219.jpg",
+        "isUs": false
+      },
+      "away": {
+        "name": "Септември 97",
+        "logo": "assets/logos/bfb/clubs-20250725084541.jpg",
+        "isUs": true
+      },
+      "score": null,
+      "liveUrl": null,
+      "url": "https://comps.basketball.bg/game-385174"
+    },
+    {
+      "id": "bfb-385139",
+      "source": "bfb",
+      "team": "u19",
+      "competition": "Девойки 19г.",
+      "phase": "Елитна група ЗАПАД",
+      "round": 6,
+      "date": "2027-01-21",
+      "time": "17:00",
+      "start": "2027-01-21T17:00:00+02:00",
+      "venue": null,
+      "home": {
+        "name": "Септември 97",
+        "logo": "assets/logos/bfb/clubs-20250725084541.jpg",
+        "isUs": true
+      },
+      "away": {
+        "name": "Рилски спортист",
+        "logo": "assets/logos/bfb/clubs-20250527185844.png",
+        "isUs": false
+      },
+      "score": null,
+      "liveUrl": null,
+      "url": "https://comps.basketball.bg/game-385139"
+    },
+    {
+      "id": "bfb-384820",
+      "source": "bfb",
+      "team": "women",
+      "competition": "А група Жени",
+      "phase": "Редовен сезон",
+      "round": 14,
+      "date": "2027-01-23",
+      "time": "14:00",
+      "start": "2027-01-23T14:00:00+02:00",
+      "venue": "Триадица - София",
+      "home": {
+        "name": "Шампион 2006",
+        "logo": "assets/logos/bfb/clubs-20170606132219.jpg",
+        "isUs": false
+      },
+      "away": {
+        "name": "Септември 97",
+        "logo": "assets/logos/bfb/clubs-20250725084541.jpg",
+        "isUs": true
+      },
+      "score": null,
+      "liveUrl": null,
+      "url": "https://comps.basketball.bg/game-384820"
+    },
+    {
+      "id": "bfb-385404",
+      "source": "bfb",
+      "team": "u15",
+      "competition": "Девойки 15г.",
+      "phase": "ЗАПАД",
+      "round": 7,
+      "date": "2027-01-30",
+      "time": "10:00",
+      "start": "2027-01-30T10:00:00+02:00",
+      "venue": null,
+      "home": {
+        "name": "Септември 97",
+        "logo": "assets/logos/bfb/clubs-20250725084541.jpg",
+        "isUs": true
+      },
+      "away": {
+        "name": "Рилски спортист",
+        "logo": "assets/logos/bfb/clubs-20250527185844.png",
+        "isUs": false
+      },
+      "score": null,
+      "liveUrl": null,
+      "url": "https://comps.basketball.bg/game-385404"
+    },
+    {
+      "id": "bfb-385179",
+      "source": "bfb",
+      "team": "u16",
+      "competition": "Девойки 16г.",
+      "phase": "Елитна група ЗАПАД",
+      "round": 7,
+      "date": "2027-01-31",
+      "time": "10:00",
+      "start": "2027-01-31T10:00:00+02:00",
+      "venue": null,
+      "home": {
+        "name": "Септември 97",
+        "logo": "assets/logos/bfb/clubs-20250725084541.jpg",
+        "isUs": true
+      },
+      "away": {
+        "name": "Славия-1921",
+        "logo": "assets/logos/bfb/clubs-20250801105430.jpg",
+        "isUs": false
+      },
+      "score": null,
+      "liveUrl": null,
+      "url": "https://comps.basketball.bg/game-385179"
+    },
+    {
+      "id": "bfb-385141",
+      "source": "bfb",
+      "team": "u19",
+      "competition": "Девойки 19г.",
+      "phase": "Елитна група ЗАПАД",
+      "round": 7,
+      "date": "2027-02-04",
+      "time": "17:00",
+      "start": "2027-02-04T17:00:00+02:00",
+      "venue": null,
+      "home": {
+        "name": "Шампион 2006",
+        "logo": "assets/logos/bfb/clubs-20170606132219.jpg",
+        "isUs": false
+      },
+      "away": {
+        "name": "Септември 97",
+        "logo": "assets/logos/bfb/clubs-20250725084541.jpg",
+        "isUs": true
+      },
+      "score": null,
+      "liveUrl": null,
+      "url": "https://comps.basketball.bg/game-385141"
+    },
+    {
+      "id": "bfb-385080",
+      "source": "bfb",
+      "team": "u14",
+      "competition": "Момичета 14г.",
+      "phase": "Елитна група ЗАПАД",
+      "round": 8,
+      "date": "2027-02-07",
+      "time": "10:00",
+      "start": "2027-02-07T10:00:00+02:00",
+      "venue": null,
+      "home": {
+        "name": "Ахил",
+        "logo": "assets/logos/bfb/clubs-20130916110018.jpg",
+        "isUs": false
+      },
+      "away": {
+        "name": "Септември 97",
+        "logo": "assets/logos/bfb/clubs-20250725084541.jpg",
+        "isUs": true
+      },
+      "score": null,
+      "liveUrl": null,
+      "url": "https://comps.basketball.bg/game-385080"
+    },
+    {
+      "id": "bfb-385406",
+      "source": "bfb",
+      "team": "u15",
+      "competition": "Девойки 15г.",
+      "phase": "ЗАПАД",
+      "round": 8,
+      "date": "2027-02-13",
+      "time": "10:00",
+      "start": "2027-02-13T10:00:00+02:00",
+      "venue": null,
+      "home": {
+        "name": "ЦСКА",
+        "logo": "assets/logos/bfb/clubs-20260812154705.png",
+        "isUs": false
+      },
+      "away": {
+        "name": "Септември 97",
+        "logo": "assets/logos/bfb/clubs-20250725084541.jpg",
+        "isUs": true
+      },
+      "score": null,
+      "liveUrl": null,
+      "url": "https://comps.basketball.bg/game-385406"
+    },
+    {
+      "id": "bfb-385183",
+      "source": "bfb",
+      "team": "u16",
+      "competition": "Девойки 16г.",
+      "phase": "Елитна група ЗАПАД",
+      "round": 8,
+      "date": "2027-02-14",
+      "time": "10:00",
+      "start": "2027-02-14T10:00:00+02:00",
+      "venue": null,
+      "home": {
+        "name": "Септември 97",
+        "logo": "assets/logos/bfb/clubs-20250725084541.jpg",
+        "isUs": true
+      },
+      "away": {
+        "name": "Рилски спортист",
+        "logo": "assets/logos/bfb/clubs-20250527185844.png",
+        "isUs": false
+      },
+      "score": null,
+      "liveUrl": null,
+      "url": "https://comps.basketball.bg/game-385183"
+    },
+    {
+      "id": "bfb-385143",
+      "source": "bfb",
+      "team": "u19",
+      "competition": "Девойки 19г.",
+      "phase": "Елитна група ЗАПАД",
+      "round": 8,
+      "date": "2027-02-18",
+      "time": "17:00",
+      "start": "2027-02-18T17:00:00+02:00",
+      "venue": null,
+      "home": {
+        "name": "Локомотив София",
+        "logo": "assets/logos/bfb/clubs-20251114115816.png",
+        "isUs": false
+      },
+      "away": {
+        "name": "Септември 97",
+        "logo": "assets/logos/bfb/clubs-20250725084541.jpg",
+        "isUs": true
+      },
+      "score": null,
+      "liveUrl": null,
+      "url": "https://comps.basketball.bg/game-385143"
+    },
+    {
+      "id": "bfb-385084",
+      "source": "bfb",
+      "team": "u14",
+      "competition": "Момичета 14г.",
+      "phase": "Елитна група ЗАПАД",
+      "round": 9,
+      "date": "2027-02-21",
+      "time": "10:00",
+      "start": "2027-02-21T10:00:00+02:00",
+      "venue": null,
+      "home": {
+        "name": "Септември 97",
+        "logo": "assets/logos/bfb/clubs-20250725084541.jpg",
+        "isUs": true
+      },
+      "away": {
+        "name": "Локомотив София",
+        "logo": "assets/logos/bfb/clubs-20251114115816.png",
+        "isUs": false
+      },
+      "score": null,
+      "liveUrl": null,
+      "url": "https://comps.basketball.bg/game-385084"
+    },
+    {
+      "id": "bfb-385186",
+      "source": "bfb",
+      "team": "u16",
+      "competition": "Девойки 16г.",
+      "phase": "Елитна група ЗАПАД",
+      "round": 9,
+      "date": "2027-02-28",
+      "time": "10:00",
+      "start": "2027-02-28T10:00:00+02:00",
+      "venue": null,
+      "home": {
+        "name": "НСА",
+        "logo": "assets/logos/bfb/clubs-20250724175934.jpg",
+        "isUs": false
+      },
+      "away": {
+        "name": "Септември 97",
+        "logo": "assets/logos/bfb/clubs-20250725084541.jpg",
+        "isUs": true
+      },
+      "score": null,
+      "liveUrl": null,
+      "url": "https://comps.basketball.bg/game-385186"
+    },
+    {
+      "id": "bfb-385147",
+      "source": "bfb",
+      "team": "u19",
+      "competition": "Девойки 19г.",
+      "phase": "Елитна група ЗАПАД",
+      "round": 9,
+      "date": "2027-03-04",
+      "time": "17:00",
+      "start": "2027-03-04T17:00:00+02:00",
+      "venue": null,
+      "home": {
+        "name": "Септември 97",
+        "logo": "assets/logos/bfb/clubs-20250725084541.jpg",
+        "isUs": true
+      },
+      "away": {
+        "name": "НСА",
+        "logo": "assets/logos/bfb/clubs-20250724175934.jpg",
+        "isUs": false
+      },
+      "score": null,
+      "liveUrl": null,
+      "url": "https://comps.basketball.bg/game-385147"
+    },
+    {
+      "id": "bfb-385088",
+      "source": "bfb",
+      "team": "u14",
+      "competition": "Момичета 14г.",
+      "phase": "Елитна група ЗАПАД",
+      "round": 10,
+      "date": "2027-03-07",
+      "time": "10:00",
+      "start": "2027-03-07T10:00:00+02:00",
+      "venue": null,
+      "home": {
+        "name": "Славия-1921",
+        "logo": "assets/logos/bfb/clubs-20250801105430.jpg",
+        "isUs": false
+      },
+      "away": {
+        "name": "Септември 97",
+        "logo": "assets/logos/bfb/clubs-20250725084541.jpg",
+        "isUs": true
+      },
+      "score": null,
+      "liveUrl": null,
+      "url": "https://comps.basketball.bg/game-385088"
+    },
+    {
+      "id": "bfb-385412",
+      "source": "bfb",
+      "team": "u15",
+      "competition": "Девойки 15г.",
+      "phase": "ЗАПАД",
+      "round": 10,
+      "date": "2027-03-13",
+      "time": "10:00",
+      "start": "2027-03-13T10:00:00+02:00",
+      "venue": null,
+      "home": {
+        "name": "Септември 97",
+        "logo": "assets/logos/bfb/clubs-20250725084541.jpg",
+        "isUs": true
+      },
+      "away": {
+        "name": "Шампион 2006",
+        "logo": "assets/logos/bfb/clubs-20170606132219.jpg",
+        "isUs": false
+      },
+      "score": null,
+      "liveUrl": null,
+      "url": "https://comps.basketball.bg/game-385412"
+    },
+    {
+      "id": "bfb-385189",
+      "source": "bfb",
+      "team": "u16",
+      "competition": "Девойки 16г.",
+      "phase": "Елитна група ЗАПАД",
+      "round": 10,
+      "date": "2027-03-14",
+      "time": "10:00",
+      "start": "2027-03-14T10:00:00+02:00",
+      "venue": null,
+      "home": {
+        "name": "Септември 97",
+        "logo": "assets/logos/bfb/clubs-20250725084541.jpg",
+        "isUs": true
+      },
+      "away": {
+        "name": "ЦСКА",
+        "logo": "assets/logos/bfb/clubs-20260812154705.png",
+        "isUs": false
+      },
+      "score": null,
+      "liveUrl": null,
+      "url": "https://comps.basketball.bg/game-385189"
+    },
+    {
+      "id": "bfb-385151",
+      "source": "bfb",
+      "team": "u19",
+      "competition": "Девойки 19г.",
+      "phase": "Елитна група ЗАПАД",
+      "round": 10,
+      "date": "2027-03-18",
+      "time": "17:00",
+      "start": "2027-03-18T17:00:00+02:00",
+      "venue": null,
+      "home": {
+        "name": "Славия-1921",
+        "logo": "assets/logos/bfb/clubs-20250801105430.jpg",
+        "isUs": false
+      },
+      "away": {
+        "name": "Септември 97",
+        "logo": "assets/logos/bfb/clubs-20250725084541.jpg",
+        "isUs": true
+      },
+      "score": null,
+      "liveUrl": null,
+      "url": "https://comps.basketball.bg/game-385151"
+    },
+    {
+      "id": "bfb-385386",
+      "source": "bfb",
+      "team": "u15",
+      "competition": "Девойки 15г.",
+      "phase": "ЗАПАД",
+      "round": 1,
+      "date": "2027-03-27",
+      "time": "10:00",
+      "start": "2027-03-27T10:00:00+02:00",
+      "venue": null,
+      "home": {
+        "name": "Септември 97",
+        "logo": "assets/logos/bfb/clubs-20250725084541.jpg",
+        "isUs": true
+      },
+      "away": {
+        "name": "Славия-1921",
+        "logo": "assets/logos/bfb/clubs-20250801105430.jpg",
+        "isUs": false
+      },
+      "score": null,
+      "liveUrl": null,
+      "url": "https://comps.basketball.bg/game-385386"
+    },
+    {
+      "id": "bfb-385192",
+      "source": "bfb",
+      "team": "u16",
+      "competition": "Девойки 16г.",
+      "phase": "Елитна група ЗАПАД",
+      "round": 11,
+      "date": "2027-03-28",
+      "time": "10:00",
+      "start": "2027-03-28T10:00:00+03:00",
+      "venue": null,
+      "home": {
+        "name": "Септември 97",
+        "logo": "assets/logos/bfb/clubs-20250725084541.jpg",
+        "isUs": true
+      },
+      "away": {
+        "name": "Локомотив София",
+        "logo": "assets/logos/bfb/clubs-20251114115816.png",
+        "isUs": false
+      },
+      "score": null,
+      "liveUrl": null,
+      "url": "https://comps.basketball.bg/game-385192"
+    },
+    {
+      "id": "bfb-385202",
+      "source": "bfb",
+      "team": "u16",
+      "competition": "Девойки 16г.",
+      "phase": "Елитна група ЗАПАД",
+      "round": 13,
+      "date": "2027-04-18",
+      "time": "10:00",
+      "start": "2027-04-18T10:00:00+03:00",
+      "venue": null,
+      "home": {
+        "name": "Септември 97",
+        "logo": "assets/logos/bfb/clubs-20250725084541.jpg",
+        "isUs": true
+      },
+      "away": {
+        "name": "Шампион 2006",
+        "logo": "assets/logos/bfb/clubs-20170606132219.jpg",
+        "isUs": false
+      },
+      "score": null,
+      "liveUrl": null,
+      "url": "https://comps.basketball.bg/game-385202"
+    },
+    {
+      "id": "bfb-385207",
+      "source": "bfb",
+      "team": "u16",
+      "competition": "Девойки 16г.",
+      "phase": "Елитна група ЗАПАД",
+      "round": 14,
+      "date": "2027-04-25",
+      "time": "10:00",
+      "start": "2027-04-25T10:00:00+03:00",
+      "venue": null,
+      "home": {
+        "name": "Славия-1921",
+        "logo": "assets/logos/bfb/clubs-20250801105430.jpg",
+        "isUs": false
+      },
+      "away": {
+        "name": "Септември 97",
+        "logo": "assets/logos/bfb/clubs-20250725084541.jpg",
+        "isUs": true
+      },
+      "score": null,
+      "liveUrl": null,
+      "url": "https://comps.basketball.bg/game-385207"
+    }
+  ]
+}

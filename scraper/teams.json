@@ -1,0 +1,10 @@
+[
+  { "key": "women", "label": "Жени", "short": "Жени", "tId": 1890, "page": "team-1890-septemvri-97" },
+  { "key": "u19", "label": "Девойки U19", "short": "U19", "tId": 3672, "page": "team-3672-septemvri-97" },
+  { "key": "u17", "label": "Девойки U17 · WABA", "short": "U17", "tId": null, "page": null },
+  { "key": "u16", "label": "Девойки U16", "short": "U16", "tId": 548, "page": "team-548-septemvri-97" },
+  { "key": "u15", "label": "Девойки U15", "short": "U15", "tId": 3775, "page": "team-3775-septemvri-97" },
+  { "key": "u14", "label": "Момичета U14", "short": "U14", "tId": 546, "page": "team-546-septemvri-97" },
+  { "key": "u13", "label": "Момичета U13", "short": "U13", "tId": 3143, "page": "team-3143-septemvri-97" },
+  { "key": "u12", "label": "Момичета U12", "short": "U12", "tId": 544, "page": "team-544-septemvri-97" }
+]

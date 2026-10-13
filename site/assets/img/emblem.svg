@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-58 -58 116 116" role="img" aria-label="БК Септември 97">
+  <!-- Simplified trace of the club emblem: red ball inside an open white ring that reads as "С".
+       Replace with the club's vector logo when it exists. -->
+  <defs>
+    <clipPath id="e-front"><rect x="-70" y="0" width="140" height="70"/></clipPath>
+    <clipPath id="e-ball"><circle r="28.5"/></clipPath>
+    <path id="e-ring" d="M29 15.59A58 18 0 1 1 57.12 3.13" fill="none" stroke-linecap="round"/>
+  </defs>
+  <g transform="rotate(-38)">
+    <use href="#e-ring" stroke="#0B0A0C" stroke-width="11"/>
+    <use href="#e-ring" stroke="#FCFCFC" stroke-width="6.5"/>
+    <circle cx="-8" cy="-3" r="30" fill="#DA162D" stroke="#0B0A0C" stroke-width="3.5"/>
+    <g clip-path="url(#e-ball)" fill="none" stroke="#0B0A0C" stroke-width="3" stroke-linecap="round" transform="translate(-8 -3)">
+      <path d="M-31 2C-10 10 10 8 31-2"/>
+      <path d="M-4-31C4-10 6 10-2 31"/>
+      <path d="M-22-21C-10-8-10 10-22 22"/>
+      <path d="M20-23C10-10 10 10 22 20"/>
+    </g>
+    <g clip-path="url(#e-front)">
+      <use href="#e-ring" stroke="#0B0A0C" stroke-width="11"/>
+      <use href="#e-ring" stroke="#FCFCFC" stroke-width="6.5"/>
+    </g>
+  </g>
+</svg>

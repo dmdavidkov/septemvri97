@@ -1,0 +1,89 @@
+name: Site
+
+on:
+  # Every commit to main is tested and published.
+  push:
+    branches: [main]
+  # Every 3 hours from 05:15 to 20:15 UTC: fetch the BFB schedule, commit it if it changed, publish.
+  schedule:
+    - cron: '15 5-20/3 * * *'
+  # "Run workflow" button in the Actions tab: refresh the schedule and publish now.
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      changed: ${{ steps.commit.outputs.changed }}
+      scrape: ${{ steps.scrape.outcome }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      # A failing test stops the run, so a broken site is never published.
+      - run: npm test
+
+      - name: Update the schedule from BFB
+        id: scrape
+        if: github.event_name != 'push'
+        continue-on-error: true
+        run: npm run scrape
+
+      # Pushes made with GITHUB_TOKEN don't start another run, so this can't loop.
+      - name: Commit the new schedule
+        id: commit
+        if: github.event_name != 'push'
+        run: |
+          git add site/data/games.json site/assets/logos/bfb
+          if git diff --cached --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Обновена програма от БФБ"
+          git pull --rebase
+          git push
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/upload-pages-artifact@v5
+        if: github.event_name != 'schedule' || steps.commit.outputs.changed == 'true'
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    if: github.event_name != 'schedule' || needs.build.outputs.changed == 'true'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5
+
+  # Runs after publishing whatever did update, so one broken team doesn't hold back the rest.
+  # A red run here makes GitHub email the repo owner.
+  report:
+    needs: [build, deploy]
+    if: always() && needs.build.outputs.scrape == 'failure'
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "::error::The BFB update failed for at least one team; its previous games were kept. See the 'Update the schedule from BFB' step."
+          exit 1
