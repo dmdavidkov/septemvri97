@@ -97,7 +97,8 @@ const needsDone = loadTab(needsSource, (text) => parseNeeds(text, { allowedHosts
   return result;
 });
 
-const bfbDone = fetch('data/games.json')
+// no-cache: GitHub Pages lets browsers reuse files for 10 minutes; this asks the server (a cheap 304 if unchanged).
+const bfbDone = fetch('data/games.json', { cache: 'no-cache' })
   .then((res) => (res.ok ? res.json() : null))
   .catch(() => null)
   .then((data) => {

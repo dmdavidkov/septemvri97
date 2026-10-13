@@ -1,6 +1,7 @@
 // Fetches the club's BFB schedules and writes site/data/games.json.
 // Gentle on BFB: one request per team, game pages only when needed, 1 s between requests.
 // A team that fails keeps its previous games; the run then exits with code 1 so GitHub emails.
+// With --soon it checks only the teams playing around now, for live links and final scores (see teamsPlayingNow).
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -13,7 +14,23 @@ const MAX_PAGE_FETCHES = 25;
 const VENUE_RETRY_DAYS = 7;
 const MAX_LOGO_BYTES = 500_000;
 
+const SOON_BEFORE_H = 2;
+const SOON_AFTER_H = 6;
+
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+// Teams with a BFB game from 2 hours before its start (BFB adds the BFB TV link close to the game) until
+// 6 hours after it, unless the score is already in.
+export function teamsPlayingNow(games, now = new Date()) {
+  const t = now.getTime();
+  return [...new Set(games
+    .filter((g) => g.source === 'bfb' && !g.score && g.time)
+    .filter((g) => {
+      const start = Date.parse(g.start);
+      return t >= start - SOON_BEFORE_H * 3_600_000 && t <= start + SOON_AFTER_H * 3_600_000;
+    })
+    .map((g) => g.team))];
+}
 
 async function readJson(file, fallback) {
   try {
@@ -23,7 +40,8 @@ async function readJson(file, fallback) {
   }
 }
 
-export async function run({ root, fetchImpl = fetch, delayMs = 1000, now = new Date(), log = console.log }) {
+// `only`: the team keys to check; the other teams keep their games as they are.
+export async function run({ root, fetchImpl = fetch, delayMs = 1000, now = new Date(), log = console.log, only = null }) {
   const teams = JSON.parse(await fs.readFile(path.join(root, 'scraper/teams.json'), 'utf8'));
   const outFile = path.join(root, 'site/data/games.json');
   const logoDir = path.join(root, 'site/assets/logos/bfb');
@@ -76,6 +94,10 @@ export async function run({ root, fetchImpl = fetch, delayMs = 1000, now = new D
   for (const team of teams) {
     if (!team.tId) continue;
     const previous = prev.games.filter((g) => g.source === 'bfb' && g.team === team.key);
+    if (only && !only.includes(team.key)) {
+      games.push(...previous);
+      continue;
+    }
     let parsed;
     try {
       parsed = parseTeamGames(await get(`team_games.inc.php?t_id=${team.tId}`));
@@ -163,7 +185,16 @@ export async function run({ root, fetchImpl = fetch, delayMs = 1000, now = new D
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-  const result = await run({ root });
+  let only = null;
+  if (process.argv.includes('--soon')) {
+    only = teamsPlayingNow((await readJson(path.join(root, 'site/data/games.json'), { games: [] })).games);
+    if (!only.length) {
+      console.log('No games around now; nothing to check.');
+      process.exit(0);
+    }
+    console.log(`Playing around now: ${only.join(', ')}`);
+  }
+  const result = await run({ root, only });
   console.log(`${result.games} games, ${result.requests} requests, ${result.changed ? 'games.json updated' : 'no changes'}`);
   if (result.errors.length) {
     console.error(`Errors:\n- ${result.errors.join('\n- ')}`);

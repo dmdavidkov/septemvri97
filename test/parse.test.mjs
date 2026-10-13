@@ -5,7 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseTeamGames, parseGamePage } from '../scraper/parse.mjs';
-import { run } from '../scraper/scrape.mjs';
+import { run, teamsPlayingNow } from '../scraper/scrape.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const fixture = (name) => fs.readFile(path.join(ROOT, 'scraper/fixtures', name), 'utf8');
@@ -138,4 +138,27 @@ test('scraper run: writes once, is stable, keeps a failing team', async () => {
   assert.equal(r3.errors.length, 1);
   assert.match(r3.errors[0], /^u19: HTTP 500/);
   assert.equal(r3.games, 22);
+
+  // Checking only the teams playing now: the other teams aren't asked and keep their games.
+  const fourth = await fakeBfb(new Set(['t_id=3672']));
+  const r4 = await run({ ...opts, fetchImpl: fourth.fetchImpl, only: ['women'] });
+  assert.deepEqual(r4.errors, []);
+  assert.equal(r4.games, 22);
+  assert.deepEqual(fourth.calls.filter((c) => c.startsWith('team_games')), ['team_games.inc.php?t_id=1890']);
+});
+
+test('teams playing now: from 2 hours before the start until the score, at most 6 hours after', () => {
+  const game = (team, start, extra = {}) => ({ source: 'bfb', team, time: start.slice(11, 16), start, score: null, ...extra });
+  const games = [
+    game('women', '2026-10-17T16:00:00+03:00'),
+    game('u16', '2026-10-17T10:00:00+03:00', { score: { home: 50, away: 40 } }),
+    game('u14', '2026-10-17T10:00:00+03:00'),
+    game('u12', '2026-10-17T00:00:00+03:00', { time: null }),
+    { ...game('u17', '2026-10-17T15:00:00+03:00'), source: 'sheet' },
+  ];
+  const at = (iso) => teamsPlayingNow(games, new Date(iso));
+  assert.deepEqual(at('2026-10-17T13:30:00+03:00'), ['u14']);
+  assert.deepEqual(at('2026-10-17T14:00:00+03:00'), ['women', 'u14']);
+  assert.deepEqual(at('2026-10-17T16:30:00+03:00'), ['women']);
+  assert.deepEqual(at('2026-10-17T22:30:00+03:00'), []);
 });

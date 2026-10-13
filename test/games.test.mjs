@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { gameStatus, buildIcs } from '../site/assets/js/games.js';
+import { shareText } from '../site/assets/js/share.js';
 
 const game = {
   id: 'bfb-384690', source: 'bfb', team: 'women', competition: 'А група Жени', phase: 'Редовен сезон', round: 2,
@@ -39,4 +40,14 @@ test('ics: UTC times, escaped text, folded lines', () => {
   const allDay = buildIcs({ ...game, time: null }, null, at('2026-10-13T08:00:00Z'));
   assert.match(allDay, /\r\nDTSTART;VALUE=DATE:20261017\r\n/);
   assert.doesNotMatch(allDay, /DTEND/);
+});
+
+test('share text: result, live game, upcoming game', () => {
+  const side = (name, isUs = false) => ({ name, isUs });
+  const g = { date: '2026-10-17', time: '16:00', team: 'Жени', home: side('Септември 97', true), away: side('Рилски спортист'), venue: 'Триадица, София', tv: null };
+  assert.equal(shareText({ ...g, status: 'upcoming' }), 'Жени: Септември 97 – Рилски спортист, събота, 17 октомври, 16:00, Триадица, София.');
+  assert.equal(shareText({ ...g, status: 'upcoming', time: null, venue: null }), 'Жени: Септември 97 – Рилски спортист, събота, 17 октомври.');
+  assert.equal(shareText({ ...g, status: 'live', tv: 'https://tv.basketball.bg/index.php?i_id=1' }), 'На живо: Септември 97 – Рилски спортист (Жени). Гледайте в BFB TV.');
+  assert.equal(shareText({ ...g, status: 'played', score: { home: 77, away: 70 }, result: 'win' }), 'Жени: Септември 97 77:70 Рилски спортист. Победа!');
+  assert.equal(shareText({ ...g, status: 'played', score: { home: 60, away: 70 }, result: 'loss' }), 'Жени: Септември 97 60:70 Рилски спортист.');
 });

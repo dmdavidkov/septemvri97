@@ -1,5 +1,6 @@
 // Schedule, results and the next-match ticket: BFB data (games.json) plus games typed into the Sheet (e.g. WABA).
-import { el, cls } from './lib/dom.js';
+// ?game=<id> (a shared match) opens the list at that game.
+import { el, cls, reducedMotion } from './lib/dom.js';
 import { dateParts } from './lib/values.js';
 
 const LIVE_MINUTES = 150;
@@ -34,8 +35,10 @@ function initials(name) {
   return letters.toUpperCase();
 }
 
+const logoSrc = (side) => (side.isUs ? 'assets/img/emblem.svg' : LOGO_PATH.test(side.logo ?? '') ? side.logo : null);
+
 function logo(side, size) {
-  const src = side.isUs ? 'assets/img/emblem.svg' : LOGO_PATH.test(side.logo ?? '') ? side.logo : null;
+  const src = logoSrc(side);
   if (!src) return el('span', { class: 'logo logo-initials', 'aria-hidden': 'true', text: initials(side.name) });
   return el('img', { class: 'logo', src, alt: '', width: size, height: size, loading: 'lazy', decoding: 'async' });
 }
@@ -67,6 +70,32 @@ function gameLink(g, status) {
   return el('a', { class: 'link-arrow game-link', href: g.url, target: '_blank', rel: 'noopener', title: g.source === 'bfb' ? 'Мачът в сайта на БФБ' : null, text: g.source === 'bfb' ? 'БФБ' : 'Линк' });
 }
 
+// BFB adds the BFB TV link close to the game; the recording stays there afterwards.
+function tvLink(g, status, labels = { upcoming: 'Излъчване в BFB TV', played: 'Запис в BFB TV', pending: 'Запис в BFB TV' }) {
+  if (!g.liveUrl || !labels[status]) return null;
+  return el('a', { class: 'tv-link', href: g.liveUrl, target: '_blank', rel: 'noopener', text: labels[status] });
+}
+
+// What share.js needs to draw and describe a game.
+function shareModel(g, team, now) {
+  const side = (s) => ({ name: s.name, isUs: s.isUs, logo: logoSrc(s), initials: initials(s.name) });
+  return {
+    id: g.id, date: g.date, time: g.time, status: gameStatus(g, now), team: team?.label ?? g.team, tag: team?.short ?? g.team,
+    competition: competitionText(g), venue: g.venue ? venueText(g.venue) : null,
+    home: side(g.home), away: side(g.away), score: g.score, result: ourResult(g), tv: g.liveUrl,
+  };
+}
+
+const share = async (g, team) => (await import('./share.js')).openShare(shareModel(g, team, Date.now()));
+
+function shareButton(g, team) {
+  return el('button', {
+    type: 'button', class: 'share-btn', title: 'Сподели',
+    'aria-label': `Сподели мача ${g.home.name} – ${g.away.name}`,
+    onclick: () => share(g, team),
+  });
+}
+
 function gameRow(g, team, now) {
   const status = gameStatus(g, now);
   const p = dateParts(g.date);
@@ -76,7 +105,7 @@ function gameRow(g, team, now) {
     el('span', { class: 'name', title: s.name, text: s.name }),
     el('span', { class: 'pts', text: pts ? pts[i] : '' }));
 
-  return el('li', { class: 'game' },
+  return el('li', { class: 'game', 'data-game': g.id },
     el('div', { class: 'game-date' },
       el('span', { class: 'd', text: p.day }),
       el('span', { class: 'm', text: p.monthShort }),
@@ -86,8 +115,11 @@ function gameRow(g, team, now) {
     el('div', { class: 'game-meta' },
       el('span', { class: 'tag', text: team?.short ?? g.team }),
       competitionText(g) ? el('span', { text: competitionText(g) }) : null,
-      g.venue ? el('span', { text: venueText(g.venue) }) : null),
-    el('div', { class: 'game-status' }, statusBadge(g, status), gameLink(g, status)));
+      g.venue ? el('span', { text: venueText(g.venue) }) : null,
+      tvLink(g, status)),
+    el('div', { class: 'game-status' },
+      statusBadge(g, status),
+      el('div', { class: 'game-actions' }, gameLink(g, status), shareButton(g, team))));
 }
 
 // ---- Calendar (.ics) for one game ----
@@ -201,6 +233,8 @@ function renderTicket(box, g, team, now) {
     timeBox,
     el('div', { class: 'ticket-actions' },
       el('button', { type: 'button', class: 'btn btn-primary btn-small', onclick: () => downloadIcs(g, team) }, 'В календара'),
+      el('button', { type: 'button', class: 'btn btn-ghost btn-small', onclick: () => share(g, team) }, 'Сподели'),
+      tvLink(g, status, { upcoming: 'Излъчване в BFB TV' }),
       g.url ? el('a', { class: 'link-arrow', href: g.url, target: '_blank', rel: 'noopener', text: g.source === 'bfb' ? 'Детайли в БФБ' : 'Детайли' }) : null));
   return tick;
 }
@@ -216,7 +250,7 @@ export function createGames() {
     more: $('games-more'), bfb: $('games-bfb'), updated: $('games-updated'), ticket: $('next-match'),
     views: [...document.querySelectorAll('.seg [data-view]')],
   };
-  const state = { data: null, failed: false, sheet: [], team: 'all', view: null, limit: PAGE_SIZE };
+  const state = { data: null, failed: false, sheet: [], team: 'all', view: null, limit: PAGE_SIZE, focus: new URLSearchParams(location.search).get('game') };
   let teams = new Map();
   let games = [];
   let lastStatuses = '';
@@ -226,8 +260,20 @@ export function createGames() {
     teams = new Map((state.data?.teams ?? []).map((t) => [t.key, t]));
     games = [...(state.data?.games ?? []), ...state.sheet]
       .sort((a, b) => Date.parse(a.start) - Date.parse(b.start) || a.id.localeCompare(b.id));
+    // A shared game: its team and tab, once it is in the data.
+    const shared = state.focus && games.find((g) => g.id === state.focus);
+    if (shared) {
+      state.team = shared.team;
+      state.view = ['upcoming', 'live'].includes(gameStatus(shared)) ? 'upcoming' : 'results';
+    }
     renderChips();
     render();
+    if (shared) {
+      const row = [...ui.list.children].find((li) => li.dataset.game === shared.id);
+      row?.classList.add('is-target');
+      row?.scrollIntoView({ block: 'center', behavior: reducedMotion() ? 'auto' : 'smooth' });
+      state.focus = null;
+    }
   }
 
   // Built once per data load; render() only flips aria-pressed, so keyboard focus stays on the chip.
@@ -251,6 +297,8 @@ export function createGames() {
     const results = mine.filter((g) => ['played', 'pending'].includes(gameStatus(g, now))).reverse();
     state.view ??= upcoming.length || !results.length ? 'upcoming' : 'results';
     const shown = state.view === 'upcoming' ? upcoming : results;
+    const focusAt = state.focus ? shown.findIndex((g) => g.id === state.focus) : -1;
+    if (focusAt >= state.limit) state.limit = Math.ceil((focusAt + 1) / PAGE_SIZE) * PAGE_SIZE;
 
     ui.controls.hidden = !games.length;
     for (const b of ui.chips.children) b.setAttribute('aria-pressed', String(b.dataset.team === state.team));

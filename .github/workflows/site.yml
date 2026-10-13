@@ -5,7 +5,8 @@ on:
   push:
     branches: [main]
   # Every 3 hours from 05:15 to 20:15 UTC: the BFB schedule (committed if it changed) and the Facebook posts.
-  # Every 30 minutes at :25 and :55: only the Facebook posts, because each run can add only the newest post.
+  # Every 30 minutes at :25 and :55: the Facebook posts (each run can add only the newest one), and BFB only
+  # for teams playing around then, so BFB TV links and final scores show up quickly.
   # A scheduled run publishes only if something changed.
   schedule:
     - cron: '15 5-20/3 * * *'
@@ -45,14 +46,17 @@ jobs:
 
       - name: Update the schedule from BFB
         id: scrape
-        if: github.event_name != 'push' && github.event.schedule != '25,55 * * * *'
+        if: github.event_name != 'push'
         continue-on-error: true
-        run: npm run scrape
+        env:
+          SCHEDULE: ${{ github.event.schedule }}
+        run: |
+          if [ "$SCHEDULE" = '25,55 * * * *' ]; then npm run scrape -- --soon; else npm run scrape; fi
 
       # Pushes made with GITHUB_TOKEN don't start another run, so this can't loop.
       - name: Commit the new schedule
         id: commit
-        if: github.event_name != 'push' && github.event.schedule != '25,55 * * * *'
+        if: github.event_name != 'push'
         run: |
           git add site/data/games.json site/assets/logos/bfb
           if git diff --cached --quiet; then
@@ -96,15 +100,18 @@ jobs:
   # Runs after publishing whatever did update, so one broken part doesn't hold back the rest.
   # A red run here makes GitHub email the repo owner. Facebook can be unreadable for hours, so on
   # scheduled runs its errors turn the run red only once a day, on the first BFB run (05:15 UTC).
+  # BFB errors turn it red on the 3-hourly runs only, not on the quick 30-minute checks.
   report:
     needs: [build, deploy]
     if: always() && (needs.build.outputs.scrape == 'failure' || needs.build.outputs.posts == 'failure')
     runs-on: ubuntu-latest
     steps:
       - if: needs.build.outputs.scrape == 'failure'
+        env:
+          SCHEDULE: ${{ github.event.schedule }}
         run: |
           echo "::error::The BFB update failed for at least one team; its previous games were kept. See the 'Update the schedule from BFB' step."
-          exit 1
+          if [ "$SCHEDULE" != '25,55 * * * *' ]; then exit 1; fi
       - if: needs.build.outputs.posts == 'failure'
         env:
           EVENT: ${{ github.event_name }}

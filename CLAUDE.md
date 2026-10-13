@@ -16,7 +16,8 @@ Static site for БК Септември 97, a women's basketball club in Sofia. 
   - Keep personal data out of commits, since history is public.
   - Visitors' browsers never contact Facebook. The page plugin, a fallback for when there are no copied posts, loads only after the visitor clicks.
   - No analytics and no cookies.
-- **BFB scraping is gentle:** one request per team, game pages only when needed, 1 s between requests. A failing team keeps its previous games.
+- **BFB scraping is gentle:** one request per team, game pages only when needed, 1 s between requests. A failing team keeps its previous games. The 30-minute runs (`--soon`) ask only for teams playing around then.
+- BFB TV links come only from BFB's own list (`liveUrl`). Don't build them from game IDs: a game without a broadcast has an empty BFB TV page.
 - **Facebook reading is gentle too:** one page request per run (every 30 minutes), and photos only for posts the site doesn't have yet. If it fails, the live posts stay. Never commit real Facebook pages or posts: the tests use made-up ones.
 - Update the tests in `test/` along with any parser change. Saved BFB pages live in `scraper/fixtures/`, trimmed so they contain no player data.
 - Times are Europe/Sofia. `start` is ISO with the Sofia offset (`sofiaISO`), and the UI shows the stored `date` and `time` as they are.

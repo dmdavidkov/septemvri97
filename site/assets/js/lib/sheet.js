@@ -145,6 +145,7 @@ export function parseGames(text, { teams, clubNames, linkDomains }) {
   const isUs = (name) => ours.includes(normalizeKey(name));
   const rows = [];
   const errors = [];
+  const ids = new Set();
   for (const { rowNumber, get } of records) {
     const problem = (message, skipped = true) => errors.push({ row: rowNumber, message, skipped });
     if (!parseBool(get('show'), true)) continue;
@@ -174,8 +175,12 @@ export function parseGames(text, { teams, clubNames, linkDomains }) {
       if (!url) problem('Линкът не е разрешен — пропуснат.', false);
     }
 
+    // Team, date and time rather than the row number, so shared links and calendar entries survive new rows.
+    let id = `sheet-${team.key}-${date}${time ? `-${time.replace(':', '')}` : ''}`;
+    if (ids.has(id)) id += `-${rowNumber}`;
+    ids.add(id);
     rows.push({
-      id: `sheet-${rowNumber}`,
+      id,
       source: 'sheet',
       team: team.key,
       competition: truncate(get('competition'), 60),

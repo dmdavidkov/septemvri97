@@ -134,9 +134,12 @@ test('games from the sheet', () => {
     'TRUE,U17 WABA,22.11.2026,,Budućnost,Септември 97,WABA U17,,56:69,',
     'TRUE,U99,22.11.2026,,A,B,,,,',
     'TRUE,Жени,32.11.2026,,A,B,,,,',
+    'TRUE,U17,22.11.2026,,Септември 97,C,,,,',
   ].join('\n');
   const { rows, errors } = parseGames(csv, GAME_OPTS);
-  assert.equal(rows.length, 2);
+  assert.equal(rows.length, 3);
+  // Shared links and calendar entries use the ID, so it doesn't depend on the row.
+  assert.deepEqual(rows.map((r) => r.id), ['sheet-u17-2026-11-21-1100', 'sheet-u17-2026-11-22', 'sheet-u17-2026-11-22-6']);
   assert.equal(rows[0].team, 'u17');
   assert.equal(rows[0].start, '2026-11-21T11:00:00+02:00');
   assert.equal(rows[0].home.isUs, true);
