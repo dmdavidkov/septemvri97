@@ -4,10 +4,12 @@ on:
   # Every commit to main is tested and published.
   push:
     branches: [main]
-  # Every 3 hours from 05:15 to 20:15 UTC: fetch the BFB schedule (committed if it changed) and the
-  # Facebook posts, then publish if either changed.
+  # Every 3 hours from 05:15 to 20:15 UTC: the BFB schedule (committed if it changed) and the Facebook posts.
+  # Every hour at :45: only the Facebook posts, because each run can add only the newest post.
+  # A scheduled run publishes only if something changed.
   schedule:
     - cron: '15 5-20/3 * * *'
+    - cron: '45 * * * *'
   # "Run workflow" button in the Actions tab: refresh the schedule and publish now.
   workflow_dispatch:
 
@@ -43,14 +45,14 @@ jobs:
 
       - name: Update the schedule from BFB
         id: scrape
-        if: github.event_name != 'push'
+        if: github.event_name != 'push' && github.event.schedule != '45 * * * *'
         continue-on-error: true
         run: npm run scrape
 
       # Pushes made with GITHUB_TOKEN don't start another run, so this can't loop.
       - name: Commit the new schedule
         id: commit
-        if: github.event_name != 'push'
+        if: github.event_name != 'push' && github.event.schedule != '45 * * * *'
         run: |
           git add site/data/games.json site/assets/logos/bfb
           if git diff --cached --quiet; then
@@ -69,7 +71,8 @@ jobs:
         id: posts
         continue-on-error: true
         env:
-          FB_PAGE_TOKEN: ${{ secrets.FB_PAGE_TOKEN }}
+          # Repository variable: links of posts the site must not show (README).
+          FB_HIDE: ${{ vars.FB_HIDE }}
         run: npm run posts
 
       - uses: actions/upload-pages-artifact@v5
@@ -88,15 +91,22 @@ jobs:
       - id: deployment
         uses: actions/deploy-pages@v5
 
-  # Runs after publishing whatever did update, so one broken team doesn't hold back the rest.
-  # A red run here makes GitHub email the repo owner.
+  # Runs after publishing whatever did update, so one broken part doesn't hold back the rest.
+  # A red run here makes GitHub email the repo owner. Facebook can be unreadable for hours, so on
+  # scheduled runs its errors turn the run red only once a day, on the first BFB run (05:15 UTC).
   report:
     needs: [build, deploy]
     if: always() && (needs.build.outputs.scrape == 'failure' || needs.build.outputs.posts == 'failure')
     runs-on: ubuntu-latest
     steps:
       - if: needs.build.outputs.scrape == 'failure'
-        run: echo "::error::The BFB update failed for at least one team; its previous games were kept. See the 'Update the schedule from BFB' step."
+        run: |
+          echo "::error::The BFB update failed for at least one team; its previous games were kept. See the 'Update the schedule from BFB' step."
+          exit 1
       - if: needs.build.outputs.posts == 'failure'
-        run: echo "::error::Facebook posts could not be fetched; the site kept the previous ones. If the token stopped working, create a new FB_PAGE_TOKEN (README)."
-      - run: exit 1
+        env:
+          EVENT: ${{ github.event_name }}
+          SCHEDULE: ${{ github.event.schedule }}
+        run: |
+          echo "::error::The Facebook page could not be read; the site kept the previous posts. See the 'Copy the latest Facebook posts' step."
+          if [ "$EVENT" != schedule ] || { [ "$SCHEDULE" = '15 5-20/3 * * *' ] && [ "$(date -u +%H)" -lt 8 ]; }; then exit 1; fi

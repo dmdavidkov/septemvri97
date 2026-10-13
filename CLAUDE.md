@@ -17,10 +17,12 @@ Static site for БК Септември 97, a women's basketball club in Sofia. 
   - Visitors' browsers never contact Facebook. The page plugin, a fallback for when there are no copied posts, loads only after the visitor clicks.
   - No analytics and no cookies.
 - **BFB scraping is gentle:** one request per team, game pages only when needed, 1 s between requests. A failing team keeps its previous games.
+- **Facebook reading is gentle too:** the public page plus one "more posts" request per run, and photos only for posts the site doesn't have yet. If it fails, the live posts stay. Never commit real Facebook pages or posts: the tests use made-up ones.
 - Update the tests in `test/` along with any parser change. Saved BFB pages live in `scraper/fixtures/`, trimmed so they contain no player data.
 - Times are Europe/Sofia. `start` is ISO with the Sofia offset (`sofiaISO`), and the UI shows the stored `date` and `time` as they are.
 
 ## Maintenance
 
 - Every new season BFB gives teams new IDs. Find each team on comps.basketball.bg (the club's pages end in `-septemvri-97`), update `tId` and `page` in `scraper/teams.json`, and run `npm run scrape`.
+- If GitHub emails daily that the Facebook page couldn't be read, Facebook has changed its page. Compare `parsePage` and `parseTimeline` in `scraper/facebook.mjs` with a freshly saved page, but keep that page out of the repository.
 - GitHub turns off the scheduled workflow after 60 days without commits, which can happen over the summer. Before the season: Actions → "Site" → Enable workflow, then Run workflow.
