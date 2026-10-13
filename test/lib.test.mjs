@@ -144,6 +144,7 @@ test('games from the sheet', () => {
   assert.equal(rows[0].team, 'u17');
   assert.equal(rows[0].start, '2026-11-21T11:00:00+02:00');
   assert.equal(rows[0].home.isUs, true);
+  assert.equal(rows[0].home.name, 'Септември 97');
   assert.equal(rows[0].url, 'https://waba-league.com/x');
   assert.equal(rows[1].team, 'u17');
   assert.equal(rows[1].time, null);

@@ -35,6 +35,24 @@ function initials(name) {
   return letters.toUpperCase();
 }
 
+// Sheet games borrow the logo BFB uses for the same club. "Рилски спортист Самоков" finds "Рилски спортист",
+// but "Славия" finds nothing, since BFB has both "Славия 1913" and "Славия 1921".
+const nameKey = (s) => s.toLowerCase().replace(/[„“”"'«»().,]/g, '').replace(/[\s-]+/g, ' ').replace(/^(бк|bc|bk) /, '').trim();
+export function sheetLogos(rows, bfbGames) {
+  const logos = new Map();
+  for (const g of bfbGames) {
+    for (const s of [g.home, g.away]) if (!s.isUs && s.logo && !logos.has(nameKey(s.name))) logos.set(nameKey(s.name), s.logo);
+  }
+  const find = (name) => {
+    const key = nameKey(name);
+    if (logos.has(key)) return logos.get(key);
+    const fits = new Set([...logos].filter(([k]) => k.startsWith(`${key} `) || key.startsWith(`${k} `)).map(([, logo]) => logo));
+    return fits.size === 1 ? [...fits][0] : null;
+  };
+  const side = (s) => (s.isUs || s.logo ? s : { ...s, logo: find(s.name) });
+  return rows.map((g) => ({ ...g, home: side(g.home), away: side(g.away) }));
+}
+
 const logoSrc = (side) => (side.isUs ? 'assets/img/emblem.svg' : LOGO_PATH.test(side.logo ?? '') ? side.logo : null);
 
 function logo(side, size) {
@@ -258,7 +276,8 @@ export function createGames() {
 
   function merge() {
     teams = new Map((state.data?.teams ?? []).map((t) => [t.key, t]));
-    games = [...(state.data?.games ?? []), ...state.sheet]
+    const bfb = state.data?.games ?? [];
+    games = [...bfb, ...sheetLogos(state.sheet, bfb)]
       .sort((a, b) => Date.parse(a.start) - Date.parse(b.start) || a.id.localeCompare(b.id));
     // A shared game: its team and tab, once it is in the data.
     const shared = state.focus && games.find((g) => g.id === state.focus);

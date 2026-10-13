@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { gameStatus, buildIcs } from '../site/assets/js/games.js';
+import { gameStatus, buildIcs, sheetLogos } from '../site/assets/js/games.js';
 import { shareText } from '../site/assets/js/share.js';
 
 const game = {
@@ -50,4 +50,20 @@ test('share text: result, live game, upcoming game', () => {
   assert.equal(shareText({ ...g, status: 'live', tv: 'https://tv.basketball.bg/index.php?i_id=1' }), 'На живо: Септември 97 – Рилски спортист (Жени). Гледайте в BFB TV.');
   assert.equal(shareText({ ...g, status: 'played', score: { home: 77, away: 70 }, result: 'win' }), 'Жени: Септември 97 77:70 Рилски спортист. Победа!');
   assert.equal(shareText({ ...g, status: 'played', score: { home: 60, away: 70 }, result: 'loss' }), 'Жени: Септември 97 60:70 Рилски спортист.');
+});
+
+test('sheet games borrow BFB logos by club name, only when one club fits', () => {
+  const side = (name, logo = null, isUs = false) => ({ name, logo, isUs });
+  const bfb = [
+    { home: side('Славия 1913', 'assets/logos/bfb/a.jpg'), away: side('Септември 97', 'assets/logos/bfb/us.jpg', true) },
+    { home: side('Славия-1921', 'assets/logos/bfb/b.jpg'), away: side('Рилски спортист', 'assets/logos/bfb/c.png') },
+  ];
+  const row = (name) => ({ id: name, home: side('Септември 97', null, true), away: side(name) });
+  const logo = (name) => sheetLogos([row(name)], bfb)[0].away.logo;
+  assert.equal(logo('Славия 1913'), 'assets/logos/bfb/a.jpg');
+  assert.equal(logo('Славия 1921'), 'assets/logos/bfb/b.jpg');
+  assert.equal(logo('БК Рилски спортист Самоков'), 'assets/logos/bfb/c.png');
+  assert.equal(logo('Славия'), null);
+  assert.equal(logo('ŽKK Partizan'), null);
+  assert.equal(sheetLogos([row('Славия 1913')], bfb)[0].home.logo, null);
 });

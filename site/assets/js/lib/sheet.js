@@ -143,6 +143,8 @@ export function parseGames(text, { teams, clubNames, linkDomains }) {
 
   const ours = clubNames.map(normalizeKey);
   const isUs = (name) => ours.includes(normalizeKey(name));
+  // However the club is typed, the site writes it as "Септември 97".
+  const side = (name) => (isUs(name) ? { name: clubNames[0], logo: null, isUs: true } : { name: truncate(name, 40), logo: null, isUs: false });
   const rows = [];
   const errors = [];
   const ids = new Set();
@@ -190,8 +192,8 @@ export function parseGames(text, { teams, clubNames, linkDomains }) {
       time,
       start: sofiaISO(date, time || '00:00'),
       venue: truncate(get('venue'), 80),
-      home: { name: truncate(home, 40), logo: null, isUs: isUs(home) },
-      away: { name: truncate(away, 40), logo: null, isUs: isUs(away) },
+      home: side(home),
+      away: side(away),
       score,
       liveUrl: null,
       url,

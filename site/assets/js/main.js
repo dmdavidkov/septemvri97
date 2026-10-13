@@ -11,8 +11,10 @@ const params = new URLSearchParams(location.search);
 const demo = params.has('demo');
 const check = params.has('check');
 
+// no-cache: browsers may otherwise reuse Google's copy for 5 minutes, so a reload after editing the Sheet
+// still showed the old row.
 async function fetchText(url) {
-  const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
+  const res = await fetch(url, { cache: 'no-cache', signal: AbortSignal.timeout(8000) });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.text();
 }
