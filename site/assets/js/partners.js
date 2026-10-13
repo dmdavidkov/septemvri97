@@ -1,7 +1,16 @@
 // Partner packages from the Sheet tab "Пакети", one card per row. With none (tab empty, not connected or
 // unreachable), the section keeps the "write to us" block that index.html has.
 import { el, cls, mailto } from './lib/dom.js';
-import { providerName } from './lib/values.js';
+import { providerName, formatNumber } from './lib/values.js';
+
+// "1 000" large with a smaller "€"; a price in words ("по договаряне") on the same line. Always present, even
+// empty, because every card has the same four rows (name, price, benefits, buttons) that line up in CSS.
+function priceLine(p) {
+  if (p.amount !== null) {
+    return el('p', { class: 'price' }, el('span', { class: 'num', text: formatNumber(p.amount) }), el('span', { class: 'cur', text: '€' }));
+  }
+  return el('p', { class: 'price words' }, p.price ? el('span', { class: 'num', text: p.price }) : null);
+}
 
 function tierCard(p, email) {
   const subject = `Партньорство – ${p.name}`;
@@ -15,9 +24,9 @@ function tierCard(p, email) {
     : el('a', { class: cls('btn', p.highlight ? 'btn-primary' : 'btn-outline'), href: mailto(email, subject) }, 'Пишете ни');
   return el('li', { class: cls('tier', p.highlight && 'tier-top') },
     el('h3', { text: p.name }),
-    p.price ? el('p', { class: cls('price', !p.amount && 'words') }, el('span', { text: p.price })) : null,
+    priceLine(p),
     el('ul', {}, p.benefits.map((b) => el('li', { text: b }))),
-    actions);
+    el('div', { class: 'tier-actions' }, actions));
 }
 
 export function initPartners({ config, packages }) {

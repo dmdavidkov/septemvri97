@@ -233,14 +233,14 @@ export function parseGames(text, { teams, clubNames, linkDomains }) {
   return { rows, errors };
 }
 
-// "1000", "1 000 €" or "1000,00 €" becomes "1000 €" (amount); other text ("по договаряне", "от 500 €")
-// stays as typed.
+// "1000", "1 000 €" or "1000,00 €" becomes "1 000 €" with amount 1000; other text ("по договаряне",
+// "от 500 €") stays as typed, without an amount.
 function price(s) {
   if (/^[\d\s.,]+(€|евро|eur)?$/i.test(s)) {
     const n = parseNumber(s);
-    if (n !== null) return { price: formatEuro(n), amount: true };
+    if (n !== null) return { price: formatEuro(n), amount: n };
   }
-  return { price: truncate(s, 40), amount: false };
+  return { price: truncate(s, 40), amount: null };
 }
 
 export function parsePackages(text, { allowedHosts }) {

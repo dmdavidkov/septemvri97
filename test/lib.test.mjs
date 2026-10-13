@@ -85,8 +85,9 @@ test('payment links: exact https hosts only', () => {
 });
 
 test('formatting', () => {
-  // Bulgarian CLDR leaves 4-digit numbers ungrouped.
-  assert.equal(formatEuro(1200), '1200 €');
+  // Grouped even with four digits, which Bulgarian CLDR leaves ungrouped.
+  assert.equal(formatEuro(1200).replace(/\s/g, ' '), '1 200 €');
+  assert.equal(formatEuro(500), '500 €');
   assert.equal(formatEuro(12000).replace(/\s/g, ' '), '12 000 €');
   assert.equal(formatEuro(12.5), '12,5 €');
   const p = dateParts('2026-10-17');
@@ -178,8 +179,8 @@ test('packages: prices, one benefit per line, payment links, hidden and bad rows
     'TRUE,,10,Без име,,',
   ].join('\n');
   const { rows, errors } = parsePackages(csv, { allowedHosts: HOSTS });
-  assert.deepEqual(rows.map((r) => [r.name, r.price, r.amount, r.highlight]), [
-    ['Приятел', '50 €', true, false], ['Партньор', '1000 €', true, false], ['Генерален спонсор', 'по договаряне', false, true],
+  assert.deepEqual(rows.map((r) => [r.name, r.price.replace(/\s/g, ' '), r.amount, r.highlight]), [
+    ['Приятел', '50 €', 50, false], ['Партньор', '1 000 €', 1000, false], ['Генерален спонсор', 'по договаряне', null, true],
   ]);
   assert.deepEqual(rows[0].benefits, ['Името ви на сайта', 'Благодарност във Facebook']);
   assert.deepEqual(rows[1].benefits, ['Лого', 'Банер']);

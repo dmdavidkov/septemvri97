@@ -140,10 +140,15 @@ export function providerName(host) {
   return '';
 }
 
-const euro = new Intl.NumberFormat('bg-BG', { maximumFractionDigits: 2 });
+// Thousands always grouped ("1 000"): Bulgarian leaves four-digit numbers ungrouped by default.
+const euro = new Intl.NumberFormat('bg-BG', { maximumFractionDigits: 2, useGrouping: 'always' });
+
+export function formatNumber(n) {
+  return euro.format(n);
+}
 
 export function formatEuro(n) {
-  return `${euro.format(n)} €`;
+  return `${formatNumber(n)} €`;
 }
 
 const MONTHS = ['януари', 'февруари', 'март', 'април', 'май', 'юни', 'юли', 'август', 'септември', 'октомври', 'ноември', 'декември'];

@@ -30,6 +30,7 @@
   --share: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 15V3M7.5 7.5 12 3l4.5 4.5M5 12.5V19a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6.5' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   --play: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M3 1.8v8.4L10 6z' fill='black'/%3E%3C/svg%3E");
   --arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M3 9 9 3M4.2 3H9v4.8' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  --check: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M1.8 6.4 4.6 9.2 10.2 2.8' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
 
   /* Context colours; dark and paper sections override them. */
   --text: var(--ink);
@@ -462,18 +463,30 @@ progress::-moz-progress-bar { background: linear-gradient(90deg, var(--red), var
 /* Wide screens: one row for up to four packages (--tiers, set by partners.js); more wrap. */
 @media (min-width: 1100px) { .tiers { grid-template-columns: repeat(var(--tiers, 4), minmax(0, 1fr)); } }
 @media (min-width: 1000px) { .offers { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
-.tier { display: flex; flex-direction: column; gap: 10px; padding: 26px 24px; border-radius: var(--radius); background: var(--white); box-shadow: var(--shadow); transition: transform .2s ease, box-shadow .2s ease; }
+.tier { display: flex; flex-direction: column; padding: 28px 24px 24px; border-radius: var(--radius); background: var(--white); box-shadow: var(--shadow); transition: transform .2s ease, box-shadow .2s ease; }
+/* Every card has the same four rows (name, price, benefits, buttons). A subgrid lines them up across the
+   cards of a row, so a name on two lines doesn't push its price below the others. */
+@supports (grid-template-rows: subgrid) {
+  .tier { display: grid; grid-row: span 4; grid-template-rows: subgrid; row-gap: 0; }
+}
 .tier:hover { transform: translateY(-3px); box-shadow: var(--shadow-lift); }
-.tier h3 { font: 800 1.08rem/1.2 var(--font-display); letter-spacing: -.01em; }
-.price { margin: 0; color: var(--muted); }
-.price span { color: var(--text); font: 800 2rem/1.1 var(--font-display); letter-spacing: -.04em; }
-/* A price in words ("по договаряне") */
-.price.words span { font-size: 1.25rem; letter-spacing: -.02em; }
-.tier ul { display: grid; flex: 1; gap: 8px; margin: 6px 0 12px; padding: 0; list-style: none; font-size: .95rem; }
-.tier li { position: relative; padding-left: 22px; }
-.tier li::before { content: ''; position: absolute; left: 2px; top: .5em; width: 9px; height: 9px; border-radius: 50%; background: var(--red); }
-.tier .btn { align-self: flex-start; }
-.tier-hint { margin: -2px 0 0; font-size: .85rem; color: var(--muted); }
+/* The name is a small label and the price the headline, so long names ("Официален партньор") fit on one line. */
+.tier h3 { margin: 0; color: var(--accent); font: 700 .84rem/1.35 var(--font-body); letter-spacing: .1em; text-transform: uppercase; }
+.price { display: flex; flex-wrap: wrap; align-items: baseline; gap: .25em; align-self: end; margin: 10px 0 0; }
+.price .num { color: var(--text); font: 800 2.25rem/1.1 var(--font-display); letter-spacing: -.04em; white-space: nowrap; }
+.price .cur { color: var(--muted); font: 700 1.3rem/1 var(--font-display); }
+/* A price in words ("по договаряне"), on the baseline of the amounts next to it */
+.price.words .num { padding-bottom: .3em; font-size: 1.2rem; letter-spacing: -.02em; white-space: normal; }
+.price.words .num::first-letter { text-transform: uppercase; }
+.tier ul { display: grid; flex: 1; align-content: start; gap: 11px; margin: 20px 0 0; padding: 20px 0 0; border-top: 1px solid var(--line); list-style: none; font-size: .94rem; line-height: 1.45; }
+.tier li { position: relative; padding-left: 28px; }
+.tier li::before { content: ''; position: absolute; left: 0; top: .1em; width: 19px; height: 19px; border-radius: 50%; background: rgba(218, 22, 45, .1); }
+.tier li::after { content: ''; position: absolute; left: 5px; top: calc(.1em + 5px); width: 9px; height: 9px; background: var(--red); -webkit-mask: var(--check) center / contain no-repeat; mask: var(--check) center / contain no-repeat; }
+.tier-top li::before { background: rgba(246, 78, 90, .2); }
+.tier-top li::after { background: var(--coral); }
+.tier-actions { display: grid; align-content: start; gap: 10px; margin-top: 26px; }
+.tier-actions .btn { width: 100%; }
+.tier-hint { margin: 0; font-size: .85rem; color: var(--muted); text-align: center; }
 .tiers-empty { display: grid; gap: 18px; margin-top: 36px; padding: 26px 24px; border-radius: var(--radius); background: var(--white); box-shadow: var(--shadow); }
 .tiers-empty h3 { margin: 0 0 6px; font: 800 1.08rem/1.2 var(--font-display); letter-spacing: -.01em; }
 .tiers-empty p { margin: 0; max-width: 46em; color: var(--muted); }
