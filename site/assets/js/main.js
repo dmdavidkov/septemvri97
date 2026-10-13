@@ -72,10 +72,15 @@ function wirePage() {
     watched.forEach((node) => io.observe(node));
   }
 
+  // Only cards fade in; headings and text are there from the start. Afterwards the classes go,
+  // so the cards' own hover transforms work again.
   if (!reducedMotion()) {
-    for (const node of document.querySelectorAll('.section-head, .tier, .offer, .card, .stats-list li, .club-badge')) {
+    for (const node of document.querySelectorAll('.tier, .offer, .card')) {
       node.classList.add('reveal');
-      onVisible(node, () => node.classList.add('in'));
+      onVisible(node, () => {
+        node.addEventListener('transitionend', () => node.classList.remove('reveal', 'in'), { once: true });
+        node.classList.add('in');
+      });
     }
   }
 }

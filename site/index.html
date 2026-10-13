@@ -54,9 +54,9 @@
   <!-- Chalk-line filter used by the ticket frame and dividers. -->
   <svg class="defs" aria-hidden="true" focusable="false">
     <filter id="chalk" x="-2%" y="-2%" width="104%" height="104%">
-      <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="3" seed="7" result="noise"/>
-      <feDisplacementMap in="SourceGraphic" in2="noise" scale="3.5" xChannelSelector="R" yChannelSelector="G" result="rough"/>
-      <feColorMatrix in="noise" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -2.4 2.1" result="speckle"/>
+      <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="7" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="2.2" xChannelSelector="R" yChannelSelector="G" result="rough"/>
+      <feColorMatrix in="noise" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -1.5 1.65" result="speckle"/>
       <feComposite in="rough" in2="speckle" operator="in"/>
     </filter>
   </svg>
@@ -97,7 +97,6 @@
         <circle cx="300" cy="300" r="90"/>
         <path d="M300 0V600"/>
       </svg>
-      <img class="hero-emblem" src="assets/img/emblem.svg" width="560" height="560" alt="">
 
       <div class="wrap hero-grid">
         <div class="hero-copy">
@@ -146,20 +145,14 @@
       </div>
     </section>
 
-    <div class="court-divider" aria-hidden="true">
-      <svg viewBox="0 0 3000 110" preserveAspectRatio="xMidYMax slice" focusable="false">
-        <path class="court-fill" d="M0 110V60H1440A60 60 0 0 1 1560 60H3000V110Z"/>
-        <path class="court-line" d="M0 60H1440A60 60 0 0 1 1560 60H3000"/>
-        <circle class="court-line thin" cx="1500" cy="60" r="34"/>
-      </svg>
-    </div>
+    <div class="court-divider" aria-hidden="true"></div>
 
     <section class="section paper" id="podkrepi" aria-labelledby="podkrepi-title">
       <div class="wrap">
         <div class="section-head">
           <p class="eyebrow">Подкрепи</p>
           <h2 id="podkrepi-title">Изберете кауза</h2>
-          <p>Вие решавате за какво отиват парите – пътуване до турнир, топки, екипи или общо за клуба. Плащате директно по сметката на клуба или през защитена страница за плащане.</p>
+          <p id="podkrepi-intro">Вие решавате за какво отиват парите – пътуване до турнир, топки, екипи или общо за клуба. Плащате директно по сметката на клуба или през защитена страница за плащане.</p>
         </div>
 
         <p class="notice" id="donate-notice" hidden></p>
@@ -229,7 +222,7 @@
               <li>Името ви до името на клуба</li>
               <li>Всичко от „Официален партньор“</li>
             </ul>
-            <a class="btn btn-primary" href="mailto:septemvri97bm@abv.bg?subject=Партньорство%20–%20Генерален%20спонсор">Искам среща</a>
+            <a class="btn btn-primary" href="mailto:septemvri97bm@abv.bg?subject=Партньорство%20–%20Генерален%20спонсор">Пишете ни</a>
           </li>
         </ol>
 
@@ -256,7 +249,13 @@
             <a class="link-arrow" href="mailto:septemvri97bm@abv.bg?subject=Предложение%20–%20Тренирай%20с%20отбора">Пишете ни</a>
           </li>
         </ul>
-        <p class="partners-cta"><a class="btn btn-dark" href="mailto:septemvri97bm@abv.bg?subject=Среща%20за%20партньорство">Искам среща</a></p>
+        <div class="partners-cta">
+          <div>
+            <h3>Да се срещнем?</h3>
+            <p>Елате на мач или тренировка, запознайте се с отбора и заедно ще съставим пакет според вашите цели и бюджет.</p>
+          </div>
+          <a class="btn btn-light" href="mailto:septemvri97bm@abv.bg?subject=Среща%20за%20партньорство">Искам среща</a>
+        </div>
       </div>
     </section>
 
@@ -268,7 +267,12 @@
           <p>БК „Септември 97“ е основан през 1997&nbsp;г. и работи само с момичета и жени. Днес клубът има осем отбора – от U12 до жените, които от сезон 2026/27 отново играят в А&nbsp;група.</p>
           <p>През 2025&nbsp;г. момичетата до 14&nbsp;г. станаха шампиони на България. През 2026&nbsp;г. U19 и U16 спечелиха сребърни медали, а U15 – бронз в регионалната лига WABA.</p>
         </div>
-        <img class="club-badge" src="assets/img/wordmark.webp" width="800" height="351" alt="Септември 97" loading="lazy">
+        <div class="club-badge" aria-hidden="true">
+          <span class="club-badge-num">97</span>
+          <img src="assets/img/emblem.svg" width="168" height="168" alt="" loading="lazy">
+          <span class="club-badge-name">Септември 97</span>
+          <span class="club-badge-year">София · от 1997</span>
+        </div>
       </div>
 
       <div class="stats dark">
@@ -296,7 +300,12 @@
         <div class="club-cards">
           <article class="card training">
             <h3>Тренировки за момичета</h3>
-            <p>Търсим момичета, които обичат да се движат – опит не е нужен. Елате на пробна тренировка и вижте дали баскетболът е за вас.</p>
+            <p>Търсим момичета, които обичат да се движат. Елате на пробна тренировка и вижте дали баскетболът е за вас.</p>
+            <ul class="facts">
+              <li>Опит не е нужен</li>
+              <li>Отбори за всяка възраст – от U12 до жените</li>
+              <li>Тренировки в зала „Септември“, Красна поляна</li>
+            </ul>
             <!-- PLACEHOLDER: training days and times per age group, from the club. -->
             <p class="muted">Дни и часове по възрасти – очаквайте скоро. Дотогава ни пишете и ще ви кажем кога да дойдете.</p>
             <a class="btn btn-primary" href="mailto:septemvri97bm@abv.bg?subject=Записване%20на%20тренировка&amp;body=Здравейте,%0A%0AИскам%20да%20запиша%20дъщеря%20си%20на%20тренировка.%0AГодина%20на%20раждане:%20%0AТелефон%20за%20връзка:%20%0A">Запиши дъщеря си</a>

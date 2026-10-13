@@ -17,7 +17,16 @@ export function gameStatus(game, now = Date.now()) {
   return 'pending';
 }
 
-const competitionText = (g) => [g.competition, g.phase, g.round ? `Кръг ${g.round}` : ''].filter(Boolean).join(' · ');
+// On the page the team tag already names the age group, so "Момичета 14г." is left out, and "ЗАПАД" reads as "Запад".
+const AGE_ONLY = /^(Момичета|Девойки|Жени)\s+\d+\s*г\.?$/i;
+const calm = (s) => s.replace(/(?<!\p{L})([А-Я])([А-Я]{3,})(?!\p{L})/gu, (_, first, rest) => first + rest.toLowerCase());
+const competitionText = (g, { full = false } = {}) => [
+  full || !AGE_ONLY.test(g.competition ?? '') ? g.competition : '',
+  full || !g.phase ? g.phase : calm(g.phase),
+  g.round ? `Кръг ${g.round}` : '',
+].filter(Boolean).join(' · ');
+// BFB writes "Hall - City"; the last dash becomes a comma.
+const venueText = (v) => v.replace(/ - (?!.* - )/, ', ');
 
 function initials(name) {
   const words = name.replace(/[„“”"'«»()]/g, '').split(/[\s-]+/).filter(Boolean);
@@ -55,7 +64,7 @@ function statusBadge(g, status) {
 function gameLink(g, status) {
   if (status === 'live' && g.liveUrl) return el('a', { class: 'link-arrow', href: g.liveUrl, target: '_blank', rel: 'noopener', text: 'Гледай' });
   if (!g.url) return null;
-  return el('a', { class: 'link-arrow', href: g.url, target: '_blank', rel: 'noopener', text: g.source === 'bfb' ? 'БФБ' : 'Линк' });
+  return el('a', { class: 'link-arrow game-link', href: g.url, target: '_blank', rel: 'noopener', title: g.source === 'bfb' ? 'Мачът в сайта на БФБ' : null, text: g.source === 'bfb' ? 'БФБ' : 'Линк' });
 }
 
 function gameRow(g, team, now) {
@@ -77,7 +86,7 @@ function gameRow(g, team, now) {
     el('div', { class: 'game-meta' },
       el('span', { class: 'tag', text: team?.short ?? g.team }),
       competitionText(g) ? el('span', { text: competitionText(g) }) : null,
-      g.venue ? el('span', { text: g.venue }) : null),
+      g.venue ? el('span', { text: venueText(g.venue) }) : null),
     el('div', { class: 'game-status' }, statusBadge(g, status), gameLink(g, status)));
 }
 
@@ -115,7 +124,7 @@ export function buildIcs(g, team, now = Date.now()) {
       : [`DTSTART;VALUE=DATE:${g.date.replace(/-/g, '')}`]),
     `SUMMARY:${icsEscape(`${g.home.name} – ${g.away.name}${team ? ` (${team.short})` : ''}`)}`,
     g.venue ? `LOCATION:${icsEscape(g.venue)}` : null,
-    `DESCRIPTION:${icsEscape([competitionText(g), g.url].filter(Boolean).join('\n'))}`,
+    `DESCRIPTION:${icsEscape([competitionText(g, { full: true }), g.url].filter(Boolean).join('\n'))}`,
     g.url ? `URL:${g.url}` : null,
     'END:VEVENT', 'END:VCALENDAR',
   ].filter(Boolean);
@@ -185,10 +194,10 @@ function renderTicket(box, g, team, now) {
       el('span', { class: 'tag', text: team?.label ?? g.team }),
       competitionText(g) ? el('span', { text: competitionText(g) }) : null),
     el('div', { class: 'ticket-teams' }, ticketTeam(g.home), el('span', { class: 'ticket-vs', text: 'срещу' }), ticketTeam(g.away)),
-    el('div', { class: 'ticket-when' },
-      el('span', { class: 'ticket-date', text: `${p.weekdayShort}, ${p.day} ${p.month}` }),
-      el('span', { class: 'ticket-time', text: g.time ?? 'час предстои' })),
-    g.venue ? el('p', { class: 'ticket-venue', text: g.venue }) : null,
+    el('dl', { class: 'ticket-when' },
+      el('div', {}, el('dt', { text: p.weekday }), el('dd', { text: `${p.day} ${p.month}` })),
+      el('div', { class: 'time' }, el('dt', { text: 'Начало' }), el('dd', { class: g.time ? null : 'soon', text: g.time ?? 'предстои' })),
+      g.venue ? el('div', { class: 'wide venue' }, el('dt', { text: 'Зала' }), el('dd', { text: venueText(g.venue) })) : null),
     timeBox,
     el('div', { class: 'ticket-actions' },
       el('button', { type: 'button', class: 'btn btn-primary btn-small', onclick: () => downloadIcs(g, team) }, 'В календара'),

@@ -27,13 +27,14 @@ function progress(cause) {
 
 function causeCard(cause, checked, onPick) {
   const input = el('input', { type: 'radio', name: 'cause', value: cause.code || 'general', checked });
-  input.addEventListener('change', () => onPick(cause));
-  return el('label', { class: 'cause' }, input,
+  const card = el('label', { class: 'cause' }, input,
     el('span', { class: 'cause-head' },
       cause.team ? el('span', { class: 'tag', text: cause.team }) : null,
       el('span', { class: 'cause-title', text: cause.title })),
     cause.description ? el('span', { class: 'cause-desc', text: cause.description }) : null,
     cause.goal ? progress(cause) : null);
+  input.addEventListener('change', () => onPick(cause, card));
+  return card;
 }
 
 function copyButton(value, label) {
@@ -58,6 +59,7 @@ const bankRow = (label, shown, value = shown) =>
   el('div', { class: 'bank-row' }, el('dt', { text: label }), el('dd', { text: shown }), copyButton(value, label));
 
 export function initDonate({ config, needs, notice }) {
+  const donateEl = document.getElementById('donate');
   const causesEl = document.getElementById('causes');
   const panel = document.getElementById('donate-panel');
   const noticeEl = document.getElementById('donate-notice');
@@ -68,6 +70,8 @@ export function initDonate({ config, needs, notice }) {
   const open = needs.filter((n) => !n.covered);
   const covered = needs.filter((n) => n.covered);
   const options = [...open, general];
+  // With no causes in the Sheet there is nothing to choose: the panel takes the whole width.
+  const single = options.length === 1;
 
   // ?cause=N014 preselects a cause; a covered or unknown code falls back to the club in general.
   const wanted = (new URLSearchParams(location.search).get('cause') || '').trim().toUpperCase();
@@ -77,15 +81,23 @@ export function initDonate({ config, needs, notice }) {
   noticeEl.textContent = notes.filter(Boolean).join(' ');
   noticeEl.hidden = !noticeEl.textContent;
 
+  // Neither a payment link nor the IBAN is published yet: one block that asks donors to write.
+  function writeUsBlock(cause, reference) {
+    const body = `Здравейте,\n\nИскам да подкрепя „${cause.title}“. Моля, изпратете ми банковата сметка на клуба.\n`;
+    return el('div', { class: 'panel-block' },
+      el('h4', { text: 'Как да дарите' }),
+      el('p', { text: 'Плащането с карта и банковата сметка на клуба ще бъдат публикувани тук съвсем скоро. Дотогава ни пишете и ще ви изпратим данните за превод.' }),
+      el('a', { class: 'btn btn-primary', href: mailto(config.email, reference, body) }, 'Пишете ни'),
+      el('dl', { class: 'bank' }, bankRow('Основание', reference)));
+  }
+
   function onlineBlock(cause) {
     if (!cause.pay) return null;
     const block = el('div', { class: 'panel-block' }, el('h4', { text: 'Дари онлайн' }));
     if (cause.pay.placeholder) {
       block.append(
-        el('button', { type: 'button', class: 'btn btn-primary', disabled: true }, 'Онлайн дарение – скоро'),
-        el('p', { class: 'pay-hint', text: config.bank.iban
-          ? 'Подготвяме плащането с карта. Дотогава можете да дарите по банков път.'
-          : 'Подготвяме плащането с карта. Дотогава ни пишете и ще ви изпратим банковата сметка.' }));
+        el('button', { type: 'button', class: 'btn btn-soon', disabled: true }, 'Плащане с карта – скоро'),
+        el('p', { class: 'pay-hint', text: 'Дотогава можете да дарите по банков път.' }));
     } else {
       const provider = providerName(cause.pay.host) || cause.pay.host;
       block.append(
@@ -120,7 +132,7 @@ export function initDonate({ config, needs, notice }) {
     return el('div', { class: 'panel-block' },
       el('h4', { text: 'Фирма сте?' }),
       el('p', { text: 'Пишете ни – ще подготвим договор за дарение или спонсорство и документи за вашето счетоводство.' }),
-      el('a', { class: 'btn btn-ghost btn-small', href: mailto(config.email, `Дарение/спонсорство – ${what}`, body) }, 'Пишете ни'));
+      el('a', { class: 'btn btn-ghost btn-small', href: mailto(config.email, `Дарение/спонсорство – ${what}`, body) }, 'Изпратете запитване'));
   }
 
   function shareBlock(cause) {
@@ -128,7 +140,8 @@ export function initDonate({ config, needs, notice }) {
     const url = new URL(location.pathname, location.origin);
     if (cause.code) url.searchParams.set('cause', cause.code);
     url.hash = 'podkrepi';
-    const btn = el('button', { type: 'button', class: 'btn btn-ghost btn-small' }, 'Сподели каузата');
+    const label = cause.code ? 'Сподели каузата' : 'Сподели с приятели';
+    const btn = el('button', { type: 'button', class: 'btn btn-ghost btn-small' }, label);
     btn.addEventListener('click', async () => {
       if (navigator.share) {
         try {
@@ -140,7 +153,7 @@ export function initDonate({ config, needs, notice }) {
         await navigator.clipboard.writeText(url.href);
         announce('Линкът е копиран.');
         btn.textContent = 'Линкът е копиран';
-        setTimeout(() => { btn.textContent = 'Сподели каузата'; }, 1800);
+        setTimeout(() => { btn.textContent = label; }, 1800);
       } catch {
         announce('Копирането не успя.');
       }
@@ -148,29 +161,58 @@ export function initDonate({ config, needs, notice }) {
     return el('div', { class: 'panel-actions' }, btn);
   }
 
+  let head;
+  let body;
+  let share;
   function renderPanel(cause) {
     const reference = cause.code ? `Дарение ${cause.code}` : 'Дарение';
     const left = cause.goal ? Math.max(0, cause.goal - cause.collected) : 0;
-    panel.replaceChildren(
+    const payReady = cause.pay && !cause.pay.placeholder;
+    head = el('div', { class: 'panel-head' },
       el('p', { class: 'panel-kicker', text: cause.code ? `Кауза ${cause.code}` : 'Дарение' }),
       el('h3', { class: 'panel-title', text: cause.title }),
-      el('p', { class: 'muted', text: cause.goal ? `Остават ${formatEuro(left)} до целта.` : 'Всяка сума помага.' }),
-      onlineBlock(cause),
-      bankBlock(reference),
-      companyBlock(cause),
-      shareBlock(cause));
+      // The cause card isn't shown when it is the only option, so its description goes here.
+      single && cause.description ? el('p', { class: 'muted', text: cause.description }) : null,
+      el('p', { class: 'muted', text: cause.goal ? `Остават ${formatEuro(left)} до целта.` : 'Всяка сума помага.' }));
+    body = el('div', { class: 'panel-body' },
+      payReady || config.bank.iban ? [onlineBlock(cause), bankBlock(reference)] : writeUsBlock(cause, reference),
+      companyBlock(cause));
+    share = shareBlock(cause);
+    panel.replaceChildren(head, body);
   }
 
-  function pick(cause) {
+  // Phones: the panel opens right under the chosen cause. Wider screens keep it in its own column.
+  // Sharing comes last, except in the wide single-cause panel, where it fills the left column under the title.
+  const wideScreen = matchMedia('(min-width: 960px)');
+  function placePanel() {
+    const card = !single && !wideScreen.matches && causesEl.querySelector('input:checked')?.closest('.cause');
+    if (card) card.after(panel);
+    else if (panel.parentElement !== donateEl) donateEl.append(panel);
+    (single && wideScreen.matches ? head : body).append(share);
+  }
+
+  function pick(cause, card) {
+    // Moving the panel shifts the cards below it; keep the tapped card where it was on screen.
+    const before = card.getBoundingClientRect().top;
     selected = cause;
     renderPanel(cause);
+    placePanel();
+    window.scrollBy(0, card.getBoundingClientRect().top - before);
     announce(`Избрано: ${cause.title}`);
   }
 
+  donateEl.classList.toggle('single', single);
+  causesEl.hidden = single;
+  if (single) {
+    document.getElementById('podkrepi-title').textContent = 'Подкрепете отбора';
+    document.getElementById('podkrepi-intro').textContent = 'Даренията отиват директно в клуба, без посредници. Скоро тук ще можете да изберете и конкретна кауза – пътуване до турнир, топки или екипи.';
+  }
   causesEl.replaceChildren(
     el('legend', { class: 'sr-only', text: 'Изберете кауза' }),
     ...options.map((c) => causeCard(c, c === selected, pick)));
   renderPanel(selected);
+  placePanel();
+  wideScreen.addEventListener('change', placePanel);
 
   coveredBox.hidden = !covered.length;
   document.getElementById('covered-list').replaceChildren(...covered.map((n) =>

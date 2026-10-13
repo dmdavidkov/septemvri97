@@ -66,6 +66,9 @@ test('game page: round, venue, team ids; month "Септември" is a date, n
   });
   const html = '<div class="bar_top"><span>Купа</span><span>Финал</span><span>12 Септември 2026</span><span>Зала Септември - София</span><span>11:00</span></div>';
   assert.deepEqual(parseGamePage(html), { round: null, venue: 'Зала Септември - София', homeTeamId: null, awayTeamId: null });
+  // A phase that looks like "Hall - City" is not a venue when the schedule row names it.
+  const phaseOnly = '<div class="bar_top"><span>Момичета 12г.</span><span>Северозапад - група Б</span><span>Кръг 3</span></div>';
+  assert.equal(parseGamePage(phaseOnly, ['Момичета 12г.', 'Северозапад - група Б']).venue, null);
   assert.throws(() => parseGamePage('<html></html>'), /bar_top/);
 });
 

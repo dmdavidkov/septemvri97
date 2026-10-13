@@ -109,7 +109,7 @@ export async function run({ root, fetchImpl = fetch, delayMs = 1000, now = new D
       if ((!details || retryVenue) && pageFetches < MAX_PAGE_FETCHES) {
         pageFetches++;
         try {
-          const p = parseGamePage(await get(`game-${g.id}`));
+          const p = parseGamePage(await get(`game-${g.id}`), [g.competition, g.phase]);
           details = {
             round: p.round,
             venue: p.venue,
@@ -121,6 +121,8 @@ export async function run({ root, fetchImpl = fetch, delayMs = 1000, now = new D
         }
       }
       details ??= { round: old?.round ?? null, venue: old?.venue ?? null, homeIsUs: false, awayIsUs: false };
+      // Data saved before the parser knew the phase can hold the phase as the venue.
+      if (details.venue === g.phase) details.venue = null;
       if (!details.homeIsUs && !details.awayIsUs) {
         details.homeIsUs = isOurs(g.home.name);
         details.awayIsUs = isOurs(g.away.name);

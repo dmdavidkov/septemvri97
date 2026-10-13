@@ -64,7 +64,8 @@ export function parseTeamGames(html) {
 
 // game-<id> → { round, venue, homeTeamId, awayTeamId }. Header spans are classified by pattern,
 // never by position: competition, phase, "Кръг N", "10 Октомври 2026", venue, "18:00", "Зрители: N".
-export function parseGamePage(html) {
+// `known` holds the competition and phase from the schedule row: phases like "Северозапад - група Б" look like venues.
+export function parseGamePage(html, known = []) {
   const $ = cheerio.load(html);
   const spans = $('.bar_top > span').map((_, s) => clean($(s).text())).get().filter(Boolean);
   if (!spans.length) throw new Error('unexpected markup: .bar_top missing');
@@ -80,6 +81,7 @@ export function parseGamePage(html) {
   // rest = [competition, phase, venue…]; a two-item rest whose second item looks like "Hall - City" is a venue.
   let venue = rest.slice(2).join(', ') || null;
   if (!venue && rest.length === 2 && / - /.test(rest[1])) venue = rest[1];
+  if (venue && known.includes(venue)) venue = null;
 
   const teamId = (sel) => Number(/team-(\d+)/.exec($(sel).first().attr('href') || '')?.[1]) || null;
   return {
