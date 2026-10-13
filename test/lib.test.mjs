@@ -109,16 +109,19 @@ const NEEDS_CSV = [
 test('needs: valid rows, hidden rows, bad rows reported', () => {
   const { rows, errors, fatal } = parseNeeds(NEEDS_CSV, { allowedHosts: HOSTS });
   assert.equal(fatal, undefined);
-  assert.deepEqual(rows.map((r) => r.code), ['N014', 'N015', 'N018']);
+  assert.deepEqual(rows.map((r) => r.code), ['N014', 'N015', 'N017', 'N018']);
   assert.equal(rows[0].pay.url, 'https://buy.stripe.com/test_1?locale=bg');
   assert.equal(rows[0].deadline, '2026-11-15');
   assert.equal(rows[0].description, 'Транспорт, хотел');
   assert.equal(rows[1].goal, 1200);
   assert.equal(rows[1].covered, true);
-  assert.equal(rows[2].pay, null);
-  assert.equal(rows[2].collected, 0);
+  // A cause without a goal is shown without a progress bar and is never covered.
+  assert.equal(rows[2].goal, null);
+  assert.equal(rows[2].covered, false);
+  assert.equal(rows[3].pay, null);
+  assert.equal(rows[3].collected, 0);
   const skipped = errors.filter((e) => e.skipped).map((e) => e.row);
-  assert.deepEqual(skipped, [5, 6, 7]);
+  assert.deepEqual(skipped, [5, 6]);
   assert.equal(errors.filter((e) => !e.skipped && e.row === 8).length, 3);
 });
 
@@ -133,7 +136,10 @@ test('needs: Cyrillic look-alikes become Latin; clear reasons for bad codes', ()
 
 test('needs: unpublished sheet or missing column is fatal', () => {
   assert.match(parseNeeds('<!DOCTYPE html><html>', { allowedHosts: HOSTS }).fatal, /публикувана/);
-  assert.match(parseNeeds('Код,Заглавие\nN1,X', { allowedHosts: HOSTS }).fatal, /Цел €/);
+  assert.match(parseNeeds('Код\nN1', { allowedHosts: HOSTS }).fatal, /Заглавие/);
+  const noGoal = parseNeeds('Код,Заглавие,Цел €\nKLUB,Общо за клуба,\nN2,Топки,много', { allowedHosts: HOSTS });
+  assert.deepEqual(noGoal.rows.map((r) => [r.code, r.goal]), [['KLUB', null], ['N2', null]]);
+  assert.deepEqual(noGoal.errors.map((e) => [e.row, e.skipped]), [[3, false]]);
   assert.match(parseNeeds('', { allowedHosts: HOSTS }).fatal, /празна/);
 });
 

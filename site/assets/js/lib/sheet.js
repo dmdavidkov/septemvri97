@@ -20,7 +20,8 @@ const NEEDS_COLUMNS = {
   link: 'Линк за плащане',
   deadline: 'Срок',
 };
-const NEEDS_REQUIRED = ['code', 'title', 'goal'];
+// A cause without a goal ("Цел €" empty or no such column) is shown without a progress bar.
+const NEEDS_REQUIRED = ['code', 'title'];
 // Cyrillic capitals that look Latin: a Bulgarian keyboard types "А001" for "A001". Codes stay ASCII for bank transfers.
 const LOOKALIKE = { А: 'A', В: 'B', Е: 'E', К: 'K', М: 'M', Н: 'H', О: 'O', Р: 'P', С: 'C', Т: 'T', У: 'Y', Х: 'X' };
 
@@ -98,8 +99,14 @@ export function parseNeeds(text, { allowedHosts }) {
     if (seen.has(code)) { problem(`Кодът ${code} се повтаря.`); continue; }
     const title = get('title');
     if (!title) { problem('Липсва заглавие.'); continue; }
-    const goal = parseNumber(get('goal'));
-    if (!goal || goal <= 0) { problem('Целта трябва да е сума над 0.'); continue; }
+    let goal = null;
+    if (get('goal')) {
+      goal = parseNumber(get('goal'));
+      if (!(goal > 0)) {
+        goal = null;
+        problem('Целта не е сума над 0 – каузата се показва без цел.', false);
+      }
+    }
     if (rows.length >= MAX_NEEDS) { problem(`Показват се най-много ${MAX_NEEDS} нужди.`); continue; }
     seen.add(code);
 
@@ -130,7 +137,7 @@ export function parseNeeds(text, { allowedHosts }) {
       team: truncate(get('team'), 30),
       goal,
       collected,
-      covered: collected >= goal,
+      covered: goal !== null && collected >= goal,
       pay,
       deadline,
     });

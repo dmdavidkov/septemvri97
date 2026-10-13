@@ -1,4 +1,5 @@
-// Cause picker: needs from the Sheet plus "Общо за клуба". Money never touches the site:
+// Cause picker: the needs from the Sheet, where the club keeps its general cause as a row too. "Общо за клуба"
+// below is only for when the Sheet has no open causes (not connected, unreachable or empty). Money never touches the site:
 // donors pay through an allow-listed payment page or by bank transfer with the cause code as reference.
 import { el, onVisible, announce, mailto } from './lib/dom.js';
 import { checkPayUrl, providerName, formatEuro, dateParts } from './lib/values.js';
@@ -25,6 +26,16 @@ function progress(cause) {
       deadline ? el('span', { text: `срок ${deadline.day} ${deadline.month}` }) : null));
 }
 
+// Without a goal: what has been collected so far and the deadline, when the Sheet has them.
+function noGoal(cause) {
+  const deadline = cause.deadline ? dateParts(cause.deadline) : null;
+  if (!cause.collected && !deadline) return null;
+  return el('span', { class: 'cause-progress' },
+    el('span', { class: 'amounts' },
+      el('span', {}, cause.collected ? ['Събрани ', el('strong', { text: formatEuro(cause.collected) })] : null),
+      deadline ? el('span', { text: `срок ${deadline.day} ${deadline.month}` }) : null));
+}
+
 function causeCard(cause, checked, onPick) {
   const input = el('input', { type: 'radio', name: 'cause', value: cause.code || 'general', checked });
   const card = el('label', { class: 'cause' }, input,
@@ -32,7 +43,7 @@ function causeCard(cause, checked, onPick) {
       cause.team ? el('span', { class: 'tag', text: cause.team }) : null,
       el('span', { class: 'cause-title', text: cause.title })),
     cause.description ? el('span', { class: 'cause-desc', text: cause.description }) : null,
-    cause.goal ? progress(cause) : null);
+    cause.goal ? progress(cause) : noGoal(cause));
   input.addEventListener('change', () => onPick(cause, card));
   return card;
 }
@@ -69,15 +80,15 @@ export function initDonate({ config, needs, notice }) {
   const general = { ...GENERAL, pay: generalPay.ok ? generalPay : null };
   const open = needs.filter((n) => !n.covered);
   const covered = needs.filter((n) => n.covered);
-  const options = [...open, general];
+  const options = open.length ? open : [general];
   // With no causes in the Sheet there is nothing to choose: the panel takes the whole width.
   const single = options.length === 1;
 
-  // ?cause=N014 preselects a cause; a covered or unknown code falls back to the club in general.
+  // ?cause=N014 preselects a cause; a covered or unknown code falls back to the first one.
   const wanted = (new URLSearchParams(location.search).get('cause') || '').trim().toUpperCase();
-  let selected = (wanted && open.find((n) => n.code === wanted)) || (wanted ? general : options[0]);
+  let selected = (wanted && open.find((n) => n.code === wanted)) || options[0];
   const notes = [notice];
-  if (wanted && covered.some((n) => n.code === wanted)) notes.push('Тази кауза вече е покрита – благодарим! Можете да подкрепите клуба като цяло.');
+  if (wanted && covered.some((n) => n.code === wanted)) notes.push('Тази кауза вече е покрита – благодарим! Можете да подкрепите друга.');
   noticeEl.textContent = notes.filter(Boolean).join(' ');
   noticeEl.hidden = !noticeEl.textContent;
 
