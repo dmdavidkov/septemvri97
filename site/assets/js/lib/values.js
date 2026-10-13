@@ -76,8 +76,9 @@ export function parseBool(s, fallback) {
 }
 
 // "65:58", "65 - 58" → {home: 65, away: 58}; invalid → null.
+// Google Sheets turns a typed 65:58 into the time 65:58:00 unless the column is plain text.
 export function parseScore(s) {
-  const m = /^(\d{1,3})\s*[:\-–]\s*(\d{1,3})$/.exec(clean(s));
+  const m = /^(\d{1,3})\s*[:\-–]\s*(\d{1,3})(?::00)?$/.exec(clean(s));
   return m ? { home: Number(m[1]), away: Number(m[2]) } : null;
 }
 

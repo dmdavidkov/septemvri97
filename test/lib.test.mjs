@@ -53,6 +53,7 @@ test('booleans and scores', () => {
   assert.equal(parseBool('', true), true);
   assert.deepEqual(parseScore('65:58'), { home: 65, away: 58 });
   assert.deepEqual(parseScore('101 - 37'), { home: 101, away: 37 });
+  assert.deepEqual(parseScore('65:58:00'), { home: 65, away: 58 });
   assert.equal(parseScore('65'), null);
 });
 

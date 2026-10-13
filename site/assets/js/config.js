@@ -3,8 +3,8 @@ export default {
   // Google Sheet → File → Share → Publish to web → choose the tab → "Comma-separated values (.csv)" → copy the link.
   // Empty = that tab is not used (the site shows only "Общо за клуба" and the BFB schedule).
   sheet: {
-    needs: '', // tab "Нужди"
-    games: '', // tab "Мачове"
+    needs: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSe3OvETse7xrCYwQWFTTL4DGovVGgD8I81-0kpLsCQUe4hNoL39UGp2qSRg2FoZfTu8eh4Vr5xrfIn/pub?gid=1622944424&single=true&output=csv', // tab "Нужди"
+    games: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSe3OvETse7xrCYwQWFTTL4DGovVGgD8I81-0kpLsCQUe4hNoL39UGp2qSRg2FoZfTu8eh4Vr5xrfIn/pub?gid=2020671794&single=true&output=csv', // tab "Мачове"
   },
 
   // Online payment link for "Общо за клуба" (Stripe Payment Link recommended; PayPal works too).
