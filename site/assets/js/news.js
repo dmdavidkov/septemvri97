@@ -65,7 +65,8 @@ export async function initNews({ demo, pageUrl }) {
   const list = document.getElementById('posts');
   let posts = [];
   try {
-    const res = await fetch(demo ? 'data/sample-posts.json' : 'data/posts.json', { signal: AbortSignal.timeout(8000) });
+    // GitHub Pages lets browsers reuse files for 10 minutes; no-cache asks the server each time (a cheap 304 if unchanged).
+    const res = await fetch(demo ? 'data/sample-posts.json' : 'data/posts.json', { cache: 'no-cache', signal: AbortSignal.timeout(8000) });
     if (res.ok) posts = ((await res.json())?.posts ?? []).map(valid).filter(Boolean).slice(0, MAX);
   } catch { /* no copied posts yet: the Facebook box below */ }
 

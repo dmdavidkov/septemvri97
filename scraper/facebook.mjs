@@ -1,29 +1,29 @@
 // Copies the club's latest public Facebook posts into the site when it is published: site/data/posts.json and
 // the photos in site/assets/fb/. Neither is committed (the repository is public), and visitors' browsers never
 // contact Facebook. Without a page token there is no API for this, so it reads the public page the way a
-// logged-out browser does: one page request, which carries the newest post, and one "more posts" request.
-// Facebook usually rate-limits the second one from GitHub's servers; then the newest post is added to the
-// posts already on the live site, so the site keeps the latest few over time. Photos are downloaded only for
-// posts the site doesn't have yet.
+// logged-out browser does. The page carries only the newest post (Facebook rate-limits its "more posts" request
+// from GitHub's servers), so each run adds that post to the ones already on the live site and the site keeps
+// the latest few over time. Photos are downloaded only for posts the site doesn't have yet.
 // If the page can't be read, the live posts are kept and the run exits with code 1.
+//
+// Filling the site after a gap: save Facebook's "more posts" answer from a logged-out browser (DevTools →
+// Network → graphql), run `node scraper/facebook.mjs --seed <file>`, put the output in the temporary secret
+// FB_SEED, run the workflow once and delete the secret.
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const PAGE = 'https://www.facebook.com/profile.php?id=100027526106237';
-const GRAPHQL = 'https://www.facebook.com/api/graphql/';
-const TIMELINE_QUERY = 'ProfileCometTimelineFeedQuery';
 const LIVE = 'https://www.septemvri97.eu/';
 const MAX_POSTS = 8;
 const MAX_TEXT = 600;
 const MAX_IMAGE_BYTES = 3_000_000;
 const IMAGE_TYPES = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' };
 const IMAGE_PATH = /^assets\/fb\/[\w-]+\.(jpg|png|webp)$/;
-const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36';
 
 // Without the headers a browser sends, Facebook answers with an error page.
 const PAGE_HEADERS = {
-  'user-agent': UA,
+  'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36',
   accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
   'accept-language': 'bg-BG,bg;q=0.9,en;q=0.8',
   'sec-ch-ua': '"Chromium";v="141", "Not?A_Brand";v="8"',
@@ -37,7 +37,6 @@ const PAGE_HEADERS = {
 };
 
 const sofiaDate = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Sofia', year: 'numeric', month: '2-digit', day: '2-digit' });
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 function shorten(text) {
   const t = text.replace(/\r/g, '').replace(/[ \t]+\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
@@ -63,7 +62,7 @@ function walk(node, visit) {
   for (const value of Object.values(node)) walk(value, visit);
 }
 
-// The profile page: its JSON blocks carry the newest post, the timeline query and the LSD token for asking more.
+// The profile page: its JSON blocks carry the newest post.
 export function parsePage(html) {
   const blocks = [...html.matchAll(/<script type="application\/json"[^>]*>([\s\S]*?)<\/script>/g)].map((m) => {
     try {
@@ -72,17 +71,15 @@ export function parsePage(html) {
       return null;
     }
   });
-  let query = null;
   const stories = [];
   walk(blocks, (o) => {
-    if (!query && o.queryName === TIMELINE_QUERY && o.queryID && o.variables) query = { docId: String(o.queryID), variables: o.variables };
     for (const edge of o.timeline_list_feed_units?.edges ?? []) if (edge?.node) stories.push(edge.node);
   });
-  const lsd = html.match(/"LSD",\[\],\{"token":"([^"]+)"/)?.[1] ?? null;
-  return { lsd, query, stories };
+  return { stories };
 }
 
-// The "more posts" answer: one JSON object per line, the first post in the first line and the rest streamed after it.
+// Facebook's "more posts" answer, saved from a browser for --seed: one JSON object per line, the first post
+// in the first line and the rest streamed after it.
 export function parseTimeline(text) {
   const stories = [];
   let error = null;
@@ -162,29 +159,24 @@ export function seedList(value) {
     }));
 }
 
-// complete: `fresh` is the page's full list of newest posts. Otherwise `fresh` holds only the newest post,
-// which joins the posts already on the site; any of those newer than it must have been deleted.
-export function mergePosts({ fresh, current = [], complete, hide = [] }) {
-  let posts = fresh;
-  if (!complete) {
-    const newest = fresh[0]?.created;
-    const kept = current.filter((p) => !fresh.some((f) => f.id === p.id) && (!newest || !p.created || p.created <= newest));
-    posts = [...fresh, ...kept];
-  }
+// The newest post from the page joins the posts already on the site. Any of those newer than it must have
+// been deleted on Facebook.
+export function mergePosts({ fresh, current = [], hide = [] }) {
+  const newest = fresh[0]?.created;
+  const kept = current.filter((p) => !fresh.some((f) => f.id === p.id) && (!newest || !p.created || p.created <= newest));
   const hidden = (p) => hide.some((h) => (h.startsWith('pfbid') ? String(p.url).match(/pfbid\w+/)?.[0] === h : p.id === h));
-  return posts
+  return [...fresh, ...kept]
     .filter((p) => !hidden(p))
     .sort((a, b) => String(b.created ?? b.date).localeCompare(String(a.created ?? a.date)))
     .slice(0, MAX_POSTS);
 }
 
-export async function run({ root, fetchImpl = fetch, live = LIVE, log = console.log, hide = [], seed = [], pause = 1000 }) {
+export async function run({ root, fetchImpl = fetch, live = LIVE, log = console.log, hide = [], seed = [] }) {
   const outFile = path.join(root, 'site/data/posts.json');
   const imageDir = path.join(root, 'site/assets/fb');
-  const signal = () => AbortSignal.timeout(20_000);
 
   async function get(url, what, options = {}) {
-    const res = await fetchImpl(url, { ...options, signal: signal() });
+    const res = await fetchImpl(url, { ...options, signal: AbortSignal.timeout(20_000) });
     if (!res.ok) throw new Error(`${what}: HTTP ${res.status}`);
     return res;
   }
@@ -235,62 +227,27 @@ export async function run({ root, fetchImpl = fetch, live = LIVE, log = console.
 
   try {
     const page = await get(PAGE, 'Facebook page', { headers: PAGE_HEADERS });
-    const { lsd, query, stories } = parsePage(await page.text());
-    let fresh = toPosts(stories);
+    const fresh = toPosts(parsePage(await page.text()).stories).slice(0, 1);
     if (fresh.length === 0) throw new Error('Facebook page: no posts found (Facebook may have changed the page)');
-
-    let complete = false;
-    if (lsd && query) {
-      await sleep(pause);
-      try {
-        const res = await fetchImpl(GRAPHQL, {
-          method: 'POST',
-          headers: {
-            'content-type': 'application/x-www-form-urlencoded',
-            'user-agent': UA,
-            'accept-language': PAGE_HEADERS['accept-language'],
-            origin: 'https://www.facebook.com',
-            referer: PAGE,
-            'sec-fetch-dest': 'empty',
-            'sec-fetch-mode': 'cors',
-            'sec-fetch-site': 'same-origin',
-            'x-fb-friendly-name': TIMELINE_QUERY,
-            'x-fb-lsd': lsd,
-          },
-          body: new URLSearchParams({
-            av: '0', __user: '0', __a: '1', lsd,
-            fb_api_caller_class: 'RelayModern', fb_api_req_friendly_name: TIMELINE_QUERY,
-            variables: JSON.stringify({ ...query.variables, count: MAX_POSTS }), server_timestamps: 'true', doc_id: query.docId,
-          }),
-          signal: signal(),
-        });
-        const timeline = parseTimeline(await res.text());
-        const more = toPosts(timeline.stories);
-        if (more.length > 0) {
-          fresh = more;
-          complete = true;
-        } else {
-          log(`More posts: ${timeline.error ?? `HTTP ${res.status}`}. Adding only the newest post.`);
-        }
-      } catch (e) {
-        log(`More posts: ${e.message}. Adding only the newest post.`);
-      }
-    }
-
-    const posts = await withPhotos(mergePosts({ fresh, current: known, complete, hide }));
-    return { ...(await write(posts)), complete, error: null };
+    const posts = await withPhotos(mergePosts({ fresh, current: known, hide }));
+    return { ...(await write(posts)), error: null };
   } catch (e) {
     log(`${e.message} — keeping the posts that are on the live site.`);
-    if (known.length === 0) return { changed: false, posts: 0, complete: false, error: e.message };
-    const posts = await withPhotos(mergePosts({ fresh: [], current: known, complete: false, hide }));
-    return { ...(await write(posts)), complete: false, error: e.message };
+    if (known.length === 0) return { changed: false, posts: 0, error: e.message };
+    const posts = await withPhotos(mergePosts({ fresh: [], current: known, hide }));
+    return { ...(await write(posts)), error: e.message };
   }
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-  const result = await run({ root, hide: hideList(process.env.FB_HIDE), seed: seedList(process.env.FB_SEED) });
-  console.log(`${result.posts} posts${result.complete ? ' (full list from Facebook)' : ''}${result.changed ? ', changed' : ''}`);
-  if (process.env.GITHUB_OUTPUT) await fs.appendFile(process.env.GITHUB_OUTPUT, `changed=${result.changed}\n`);
-  if (result.error) process.exitCode = 1;
+  if (process.argv.includes('--seed')) {
+    const file = process.argv[process.argv.indexOf('--seed') + 1];
+    console.log(JSON.stringify(toPosts(parseTimeline(await fs.readFile(file, 'utf8')).stories)));
+  } else {
+    const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+    const result = await run({ root, hide: hideList(process.env.FB_HIDE), seed: seedList(process.env.FB_SEED) });
+    console.log(`${result.posts} posts${result.changed ? ', changed' : ''}`);
+    if (process.env.GITHUB_OUTPUT) await fs.appendFile(process.env.GITHUB_OUTPUT, `changed=${result.changed}\n`);
+    if (result.error) process.exitCode = 1;
+  }
 }

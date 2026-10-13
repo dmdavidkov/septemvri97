@@ -5,11 +5,11 @@ on:
   push:
     branches: [main]
   # Every 3 hours from 05:15 to 20:15 UTC: the BFB schedule (committed if it changed) and the Facebook posts.
-  # Every hour at :45: only the Facebook posts, because each run can add only the newest post.
+  # Every 30 minutes at :25 and :55: only the Facebook posts, because each run can add only the newest post.
   # A scheduled run publishes only if something changed.
   schedule:
     - cron: '15 5-20/3 * * *'
-    - cron: '45 * * * *'
+    - cron: '25,55 * * * *'
   # "Run workflow" button in the Actions tab: refresh the schedule and publish now.
   workflow_dispatch:
 
@@ -45,14 +45,14 @@ jobs:
 
       - name: Update the schedule from BFB
         id: scrape
-        if: github.event_name != 'push' && github.event.schedule != '45 * * * *'
+        if: github.event_name != 'push' && github.event.schedule != '25,55 * * * *'
         continue-on-error: true
         run: npm run scrape
 
       # Pushes made with GITHUB_TOKEN don't start another run, so this can't loop.
       - name: Commit the new schedule
         id: commit
-        if: github.event_name != 'push' && github.event.schedule != '45 * * * *'
+        if: github.event_name != 'push' && github.event.schedule != '25,55 * * * *'
         run: |
           git add site/data/games.json site/assets/logos/bfb
           if git diff --cached --quiet; then

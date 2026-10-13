@@ -27,12 +27,11 @@ function story(n, { time = at(`2026-10-0${n}T10:00:00Z`), text = `Публика
   };
 }
 
-const pageHtml = (stories, { query = true } = {}) => {
+const pageHtml = (stories) => {
   const preload = { __bbox: { result: { data: { user: { timeline_list_feed_units: { edges: stories.map((node) => ({ node })) } } } } } };
-  const preloader = { preloaderID: 'p', queryID: '123', variables: { count: 1, omitPinnedPost: true, userID: '100027526106237' }, queryName: 'ProfileCometTimelineFeedQuery' };
   return `<!doctype html><title>Page</title>
-<script type="application/json" data-sjs>${JSON.stringify({ require: [[preload], query ? [preloader] : []] })}</script>
-<script>requireLazy(["LSD",[],{"token":"lsd-token"}])</script>`;
+<script type="application/json" data-sjs>${JSON.stringify({ require: [[preload]] })}</script>
+<script type="application/json">{not json</script>`;
 };
 
 const timelineText = (stories) => [
@@ -46,11 +45,8 @@ const timelineText = (stories) => [
 ].join('\r\n');
 const rateLimited = JSON.stringify({ errors: [{ message: 'Rate limit exceeded', code: 1675004 }] });
 
-test('page and timeline: posts, the timeline query and the LSD token', () => {
-  const page = parsePage(pageHtml([story(3)]));
-  assert.equal(page.lsd, 'lsd-token');
-  assert.deepEqual(page.query, { docId: '123', variables: { count: 1, omitPinnedPost: true, userID: '100027526106237' } });
-  assert.deepEqual(page.stories.map((s) => s.post_id), ['3']);
+test('page and saved timeline: the posts in them', () => {
+  assert.deepEqual(parsePage(pageHtml([story(3)])).stories.map((s) => s.post_id), ['3']);
   assert.equal(parsePage('<html>login</html>').stories.length, 0);
 
   const timeline = parseTimeline(timelineText([story(3), story(2), story(1)]));
@@ -85,15 +81,16 @@ test('merge: the newest post joins the kept ones; deleted and hidden posts go', 
   const current = [p(9, 20), p(8, 18), p(7, 15), p(6, 14), p(5, 12)];
 
   // Post 9 is newer than the page's newest one (19 Oct), so it was deleted on Facebook.
-  assert.deepEqual(mergePosts({ fresh: [p(1, 19)], current, complete: false }).map((x) => x.id), ['1', '8', '7', '6', '5']);
-  assert.deepEqual(mergePosts({ fresh: [p(1, 21)], current, complete: false }).map((x) => x.id), ['1', '9', '8', '7', '6', '5']);
+  assert.deepEqual(mergePosts({ fresh: [p(1, 19)], current }).map((x) => x.id), ['1', '8', '7', '6', '5']);
+  assert.deepEqual(mergePosts({ fresh: [p(1, 21)], current }).map((x) => x.id), ['1', '9', '8', '7', '6', '5']);
+  // A post that is already on the site isn't repeated, and the newest 8 stay.
+  assert.deepEqual(mergePosts({ fresh: [p(9, 20)], current }).map((x) => x.id), ['9', '8', '7', '6', '5']);
   const many = Array.from({ length: 9 }, (_, i) => p(20 + i, 10 + i));
-  assert.equal(mergePosts({ fresh: [p(1, 21)], current: many, complete: false }).length, 8);
-  assert.deepEqual(mergePosts({ fresh: [p(2, 22), p(1, 21)], current, complete: true }).map((x) => x.id), ['2', '1']);
+  assert.equal(mergePosts({ fresh: [p(1, 21)], current: many }).length, 8);
 
   const hide = hideList(`https://www.facebook.com/permalink.php?story_fbid=${pfbid(8)}&id=100027526106237, 7\nhttps://www.facebook.com/profile.php?id=100027526106237`);
   assert.deepEqual(hide, [pfbid(8), '7']);
-  assert.deepEqual(mergePosts({ fresh: [], current, complete: false, hide }).map((x) => x.id), ['9', '6', '5']);
+  assert.deepEqual(mergePosts({ fresh: [], current, hide }).map((x) => x.id), ['9', '6', '5']);
 });
 
 function fakeFetch(routes) {
@@ -111,71 +108,66 @@ function fakeFetch(routes) {
 
 const jpeg = () => new Response(new Uint8Array([0xff, 0xd8, 0xff, 0xe0]), { headers: { 'content-type': 'image/jpeg' } });
 
-test('run: full list when Facebook allows, otherwise the newest post plus the live ones; live posts kept on errors', async () => {
+test('run: the newest post joins the live ones; live posts kept on errors', async () => {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), 'fb-'));
   const read = async () => JSON.parse(await fs.readFile(path.join(root, 'site/data/posts.json'), 'utf8'));
   const reset = () => fs.rm(path.join(root, 'site'), { recursive: true, force: true });
   const live = 'https://live.test/';
-  const opts = { root, live, log: () => {}, pause: 0 };
+  const opts = { root, live, log: () => {} };
 
-  // Facebook answers both requests: the site gets the full list.
+  // First publish: only the newest post from the page, with its photo.
   let { fetchImpl, calls } = fakeFetch({
-    'https://www.facebook.com/profile.php': pageHtml([story(3)]),
-    'https://www.facebook.com/api/graphql/': timelineText([story(3), story(2), story(1, { photo: null })]),
+    'https://www.facebook.com/profile.php': pageHtml([story(2), story(3)]),
     'https://scontent.xx.fbcdn.net/': jpeg(),
   });
   let result = await run({ ...opts, fetchImpl });
-  assert.deepEqual(result, { changed: true, posts: 3, complete: true, error: null });
-  const full = await read();
-  assert.deepEqual(full.posts.map((p) => [p.id, p.image]), [['3', 'assets/fb/3.jpg'], ['2', 'assets/fb/2.jpg'], ['1', null]]);
-  const graphql = calls.find((c) => c.url.includes('/api/graphql/'));
-  assert.equal(graphql.options.headers['x-fb-lsd'], 'lsd-token');
-  const body = new URLSearchParams(graphql.options.body);
-  assert.equal(body.get('doc_id'), '123');
-  assert.equal(JSON.parse(body.get('variables')).count, 8);
+  assert.deepEqual(result, { changed: true, posts: 1, error: null });
+  const first = await read();
+  assert.deepEqual(first.posts.map((p) => [p.id, p.image]), [['3', 'assets/fb/3.jpg']]);
+  const page = calls.find((c) => c.url.startsWith('https://www.facebook.com/'));
+  assert.match(page.options.headers['user-agent'], /Chrome/);
+  assert.equal(calls.filter((c) => c.url.startsWith('https://www.facebook.com/')).length, 1);
 
-  // "More posts" is rate-limited: the newest post joins the live ones, whose photos come from the live site.
+  // A newer post joins the live one, whose photo comes from the live site.
   await reset();
   ({ fetchImpl, calls } = fakeFetch({
-    'https://live.test/data/posts.json': JSON.stringify(full),
+    'https://live.test/data/posts.json': JSON.stringify(first),
     'https://live.test/assets/fb/': jpeg(),
-    'https://www.facebook.com/profile.php': pageHtml([story(4)]),
-    'https://www.facebook.com/api/graphql/': rateLimited,
+    'https://www.facebook.com/profile.php': pageHtml([story(4, { photo: null })]),
     'https://scontent.xx.fbcdn.net/': jpeg(),
   }));
   result = await run({ ...opts, fetchImpl });
-  assert.deepEqual(result, { changed: true, posts: 4, complete: false, error: null });
-  assert.deepEqual((await read()).posts.map((p) => [p.id, p.image]), [['4', 'assets/fb/4.jpg'], ['3', 'assets/fb/3.jpg'], ['2', 'assets/fb/2.jpg'], ['1', null]]);
-  assert.deepEqual(calls.filter((c) => c.url.includes('fbcdn')).map((c) => c.url), ['https://scontent.xx.fbcdn.net/v/4.jpg']);
+  assert.deepEqual(result, { changed: true, posts: 2, error: null });
+  const second = await read();
+  assert.deepEqual(second.posts.map((p) => [p.id, p.image]), [['4', null], ['3', 'assets/fb/3.jpg']]);
+  assert.deepEqual(calls.filter((c) => c.url.includes('fbcdn')), []);
 
-  // The same answer again: nothing changes, so nothing is published.
-  const again = await read();
-  ({ fetchImpl } = fakeFetch({
-    'https://live.test/data/posts.json': JSON.stringify(again),
-    'https://live.test/assets/fb/': jpeg(),
-    'https://www.facebook.com/profile.php': pageHtml([story(4)]),
-    'https://www.facebook.com/api/graphql/': rateLimited,
-  }));
+  // The same page again: nothing changes, so nothing is published.
   await reset();
+  ({ fetchImpl } = fakeFetch({
+    'https://live.test/data/posts.json': JSON.stringify(second),
+    'https://live.test/assets/fb/': jpeg(),
+    'https://www.facebook.com/profile.php': pageHtml([story(4, { photo: null })]),
+  }));
   assert.equal((await run({ ...opts, fetchImpl })).changed, false);
 
   // Facebook changed its page: the live posts stay (minus a hidden one) and the run reports the error.
   await reset();
   ({ fetchImpl } = fakeFetch({
-    'https://live.test/data/posts.json': JSON.stringify(again),
+    'https://live.test/data/posts.json': JSON.stringify(second),
     'https://live.test/assets/fb/': jpeg(),
     'https://www.facebook.com/profile.php': '<html>Please log in</html>',
   }));
-  result = await run({ ...opts, fetchImpl, hide: ['3'] });
+  result = await run({ ...opts, fetchImpl, hide: ['4'] });
   assert.match(result.error, /no posts found/);
   assert.equal(result.changed, true);
-  assert.deepEqual((await read()).posts.map((p) => p.id), ['4', '2', '1']);
-  await fs.access(path.join(root, 'site/assets/fb/4.jpg'));
+  assert.deepEqual((await read()).posts.map((p) => p.id), ['3']);
+  await fs.access(path.join(root, 'site/assets/fb/3.jpg'));
 
-  // A seed fills the site after a gap; its photos come from Facebook's links.
+  // A seed, made with --seed from a saved timeline, fills the site after a gap; its photos come from Facebook's links.
   await reset();
   const seed = seedList(JSON.stringify({ posts: [
-    { ...toPosts([story(2)])[0] },
+    ...toPosts(parseTimeline(timelineText([story(2)])).stories),
     { ...toPosts([story(1)])[0], picture: 'https://evil.example/1.jpg' },
     { id: '../x', date: '2026-10-01', created: '2026-10-01T10:00:00Z', url: 'https://www.facebook.com/x' },
   ] }));
@@ -183,7 +175,6 @@ test('run: full list when Facebook allows, otherwise the newest post plus the li
   assert.deepEqual(seedList('not json'), []);
   ({ fetchImpl } = fakeFetch({
     'https://www.facebook.com/profile.php': pageHtml([story(4)]),
-    'https://www.facebook.com/api/graphql/': rateLimited,
     'https://scontent.xx.fbcdn.net/': jpeg(),
   }));
   result = await run({ ...opts, fetchImpl, seed });
