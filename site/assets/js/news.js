@@ -1,10 +1,10 @@
-// The club's latest Facebook posts as cards. They are copied into data/posts.json when the site is published
-// (scraper/facebook.mjs), so the visitor's browser never contacts Facebook. Without copied posts the
-// section keeps the click-to-load Facebook box (fb.js).
-import { el, cls } from './lib/dom.js';
+// The club's latest Facebook posts as a row of cards: four at a time on wide screens, the rest with the arrows
+// or by swiping. They are copied into data/posts.json when the site is published (scraper/facebook.mjs), so the
+// visitor's browser never contacts Facebook. Without copied posts the section keeps the click-to-load box (fb.js).
+import { el, cls, reducedMotion } from './lib/dom.js';
 import { initFacebook } from './fb.js';
 
-const MAX = 5;
+const MAX = 8;
 const IMAGE = /^assets\/(fb|img)\/[\w-]+\.(jpe?g|png|webp)$/;
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -34,16 +34,34 @@ function showDate(iso) {
 }
 
 function card(p, i) {
-  return el('li', { class: cls('post', i === 0 && 'post-lead', !p.image && 'post-noimg') },
+  return el('li', { class: cls('post', !p.image && 'post-noimg') },
     el('a', { class: 'post-link', href: p.url, target: '_blank', rel: 'noopener' },
-      p.image ? el('img', { src: p.image, alt: '', loading: i === 0 ? null : 'lazy', decoding: 'async' }) : null,
+      p.image ? el('img', { src: p.image, alt: '', loading: i < 4 ? null : 'lazy', decoding: 'async' }) : null,
       el('span', { class: 'post-body' },
         el('time', { class: 'post-date', datetime: p.date, text: showDate(p.date) }),
         p.text ? el('span', { class: 'post-msg', text: p.text }) : null,
         el('span', { class: 'post-more link-arrow', text: 'Виж във Facebook' }))));
 }
 
+// Arrow buttons for mouse users; they hide themselves while everything fits.
+function arrows(rail, list) {
+  const prev = el('button', { type: 'button', class: 'rail-btn rail-prev', 'aria-label': 'По-нови публикации' });
+  const next = el('button', { type: 'button', class: 'rail-btn rail-next', 'aria-label': 'По-стари публикации' });
+  const step = (dir) => list.scrollBy({ left: dir * list.clientWidth * 0.9, behavior: reducedMotion() ? 'auto' : 'smooth' });
+  prev.addEventListener('click', () => step(-1));
+  next.addEventListener('click', () => step(1));
+  const update = () => {
+    prev.disabled = list.scrollLeft <= 4;
+    next.disabled = list.scrollLeft >= list.scrollWidth - list.clientWidth - 4;
+  };
+  list.addEventListener('scroll', update, { passive: true });
+  addEventListener('resize', update);
+  rail.append(prev, next);
+  update();
+}
+
 export async function initNews({ demo, pageUrl }) {
+  const rail = document.getElementById('rail');
   const list = document.getElementById('posts');
   let posts = [];
   try {
@@ -51,15 +69,13 @@ export async function initNews({ demo, pageUrl }) {
     if (res.ok) posts = ((await res.json())?.posts ?? []).map(valid).filter(Boolean).slice(0, MAX);
   } catch { /* no copied posts yet: the Facebook box below */ }
 
-  if (!list || posts.length === 0) {
+  if (!rail || !list || posts.length === 0) {
     initFacebook(pageUrl);
     return;
   }
-  // The grids are made for 1, 2, 3 or 5 cards; with 4, the oldest waits for the next post.
-  if (posts.length === 4) posts.pop();
   document.getElementById('fb')?.remove();
   list.closest('section')?.classList.add('has-posts');
-  list.dataset.count = posts.length;
   list.replaceChildren(...posts.map(card));
-  list.hidden = false;
+  rail.hidden = false;
+  arrows(rail, list);
 }

@@ -25,4 +25,5 @@ Static site for БК Септември 97, a women's basketball club in Sofia. 
 
 - Every new season BFB gives teams new IDs. Find each team on comps.basketball.bg (the club's pages end in `-septemvri-97`), update `tId` and `page` in `scraper/teams.json`, and run `npm run scrape`.
 - If GitHub emails daily that the Facebook page couldn't be read, Facebook has changed its page. Compare `parsePage` and `parseTimeline` in `scraper/facebook.mjs` with a freshly saved page, but keep that page out of the repository.
+- After a gap, the site can only add the newest post per run. To fill it in, save the latest posts locally in the `toPosts` format (with `picture` links), put them in the secret `FB_SEED`, run the workflow once, then delete the secret.
 - GitHub turns off the scheduled workflow after 60 days without commits, which can happen over the summer. Before the season: Actions → "Site" → Enable workflow, then Run workflow.

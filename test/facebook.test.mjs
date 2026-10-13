@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
-import { parsePage, parseTimeline, toPosts, hideList, mergePosts, run } from '../scraper/facebook.mjs';
+import { parsePage, parseTimeline, toPosts, hideList, seedList, mergePosts, run } from '../scraper/facebook.mjs';
 
 // Made-up posts shaped like Facebook's (real ones contain names, and the repository is public).
 const at = (iso) => Date.parse(iso) / 1000;
@@ -86,7 +86,9 @@ test('merge: the newest post joins the kept ones; deleted and hidden posts go', 
 
   // Post 9 is newer than the page's newest one (19 Oct), so it was deleted on Facebook.
   assert.deepEqual(mergePosts({ fresh: [p(1, 19)], current, complete: false }).map((x) => x.id), ['1', '8', '7', '6', '5']);
-  assert.deepEqual(mergePosts({ fresh: [p(1, 21)], current, complete: false }).map((x) => x.id), ['1', '9', '8', '7', '6']);
+  assert.deepEqual(mergePosts({ fresh: [p(1, 21)], current, complete: false }).map((x) => x.id), ['1', '9', '8', '7', '6', '5']);
+  const many = Array.from({ length: 9 }, (_, i) => p(20 + i, 10 + i));
+  assert.equal(mergePosts({ fresh: [p(1, 21)], current: many, complete: false }).length, 8);
   assert.deepEqual(mergePosts({ fresh: [p(2, 22), p(1, 21)], current, complete: true }).map((x) => x.id), ['2', '1']);
 
   const hide = hideList(`https://www.facebook.com/permalink.php?story_fbid=${pfbid(8)}&id=100027526106237, 7\nhttps://www.facebook.com/profile.php?id=100027526106237`);
@@ -130,7 +132,7 @@ test('run: full list when Facebook allows, otherwise the newest post plus the li
   assert.equal(graphql.options.headers['x-fb-lsd'], 'lsd-token');
   const body = new URLSearchParams(graphql.options.body);
   assert.equal(body.get('doc_id'), '123');
-  assert.equal(JSON.parse(body.get('variables')).count, 5);
+  assert.equal(JSON.parse(body.get('variables')).count, 8);
 
   // "More posts" is rate-limited: the newest post joins the live ones, whose photos come from the live site.
   await reset();
@@ -169,6 +171,23 @@ test('run: full list when Facebook allows, otherwise the newest post plus the li
   assert.equal(result.changed, true);
   assert.deepEqual((await read()).posts.map((p) => p.id), ['4', '2', '1']);
   await fs.access(path.join(root, 'site/assets/fb/4.jpg'));
+
+  // A seed fills the site after a gap; its photos come from Facebook's links.
+  await reset();
+  const seed = seedList(JSON.stringify({ posts: [
+    { ...toPosts([story(2)])[0] },
+    { ...toPosts([story(1)])[0], picture: 'https://evil.example/1.jpg' },
+    { id: '../x', date: '2026-10-01', created: '2026-10-01T10:00:00Z', url: 'https://www.facebook.com/x' },
+  ] }));
+  assert.deepEqual(seed.map((p) => [p.id, p.picture]), [['2', 'https://scontent.xx.fbcdn.net/v/2.jpg'], ['1', null]]);
+  assert.deepEqual(seedList('not json'), []);
+  ({ fetchImpl } = fakeFetch({
+    'https://www.facebook.com/profile.php': pageHtml([story(4)]),
+    'https://www.facebook.com/api/graphql/': rateLimited,
+    'https://scontent.xx.fbcdn.net/': jpeg(),
+  }));
+  result = await run({ ...opts, fetchImpl, seed });
+  assert.deepEqual((await read()).posts.map((p) => [p.id, p.image]), [['4', 'assets/fb/4.jpg'], ['2', 'assets/fb/2.jpg'], ['1', null]]);
 
   // Neither Facebook nor a live copy: nothing is written, the page keeps the click-to-load box.
   await reset();

@@ -73,6 +73,8 @@ jobs:
         env:
           # Repository variable: links of posts the site must not show (README).
           FB_HIDE: ${{ vars.FB_HIDE }}
+          # Temporary secret for filling the site after a gap (CLAUDE.md). Delete it after one run.
+          FB_SEED: ${{ secrets.FB_SEED }}
         run: npm run posts
 
       - uses: actions/upload-pages-artifact@v5

@@ -3,7 +3,8 @@
 // contact Facebook. Without a page token there is no API for this, so it reads the public page the way a
 // logged-out browser does: one page request, which carries the newest post, and one "more posts" request.
 // Facebook usually rate-limits the second one from GitHub's servers; then the newest post is added to the
-// posts already on the live site. Photos are downloaded only for posts the site doesn't have yet.
+// posts already on the live site, so the site keeps the latest few over time. Photos are downloaded only for
+// posts the site doesn't have yet.
 // If the page can't be read, the live posts are kept and the run exits with code 1.
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -13,7 +14,7 @@ const PAGE = 'https://www.facebook.com/profile.php?id=100027526106237';
 const GRAPHQL = 'https://www.facebook.com/api/graphql/';
 const TIMELINE_QUERY = 'ProfileCometTimelineFeedQuery';
 const LIVE = 'https://www.septemvri97.eu/';
-const MAX_POSTS = 5;
+const MAX_POSTS = 8;
 const MAX_TEXT = 600;
 const MAX_IMAGE_BYTES = 3_000_000;
 const IMAGE_TYPES = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' };
@@ -140,6 +141,27 @@ export function hideList(value = '') {
   return value.split(/[\s,]+/).map((v) => v.match(/pfbid\w+/)?.[0] ?? (/^\d+$/.test(v) ? v : null)).filter(Boolean);
 }
 
+// FB_SEED, a temporary secret for filling the site after a gap: posts as toPosts makes them (`picture` is a
+// Facebook photo link, which Facebook lets expire after a few days). They join the posts already on the site.
+export function seedList(value) {
+  let data;
+  try {
+    data = JSON.parse(value || '[]');
+  } catch {
+    return [];
+  }
+  return (Array.isArray(data) ? data : data?.posts ?? [])
+    .filter((p) => /^\w+$/.test(p?.id ?? '') && /^\d{4}-\d{2}-\d{2}$/.test(p.date ?? '') && !Number.isNaN(Date.parse(p.created)) && isFacebookUrl(p.url))
+    .map((p) => ({
+      id: p.id,
+      created: new Date(p.created).toISOString(),
+      date: p.date,
+      text: typeof p.text === 'string' ? shorten(p.text) : '',
+      picture: isFacebookImage(p.picture) ? p.picture : null,
+      url: p.url,
+    }));
+}
+
 // complete: `fresh` is the page's full list of newest posts. Otherwise `fresh` holds only the newest post,
 // which joins the posts already on the site; any of those newer than it must have been deleted.
 export function mergePosts({ fresh, current = [], complete, hide = [] }) {
@@ -156,7 +178,7 @@ export function mergePosts({ fresh, current = [], complete, hide = [] }) {
     .slice(0, MAX_POSTS);
 }
 
-export async function run({ root, fetchImpl = fetch, live = LIVE, log = console.log, hide = [], pause = 1000 }) {
+export async function run({ root, fetchImpl = fetch, live = LIVE, log = console.log, hide = [], seed = [], pause = 1000 }) {
   const outFile = path.join(root, 'site/data/posts.json');
   const imageDir = path.join(root, 'site/assets/fb');
   const signal = () => AbortSignal.timeout(20_000);
@@ -183,6 +205,7 @@ export async function run({ root, fetchImpl = fetch, live = LIVE, log = console.
     current = await (await get(new URL('data/posts.json', live), 'live posts')).json();
     if (!Array.isArray(current?.posts)) current = null;
   } catch { /* first publish, or the site is down */ }
+  const known = [...(current?.posts ?? []), ...seed.filter((p) => !current?.posts.some((c) => c.id === p.id))];
 
   // A post's photo comes from the live site when it is already there, otherwise from Facebook.
   async function withPhotos(posts) {
@@ -254,19 +277,19 @@ export async function run({ root, fetchImpl = fetch, live = LIVE, log = console.
       }
     }
 
-    const posts = await withPhotos(mergePosts({ fresh, current: current?.posts ?? [], complete, hide }));
+    const posts = await withPhotos(mergePosts({ fresh, current: known, complete, hide }));
     return { ...(await write(posts)), complete, error: null };
   } catch (e) {
     log(`${e.message} — keeping the posts that are on the live site.`);
-    if (!current) return { changed: false, posts: 0, complete: false, error: e.message };
-    const posts = await withPhotos(mergePosts({ fresh: [], current: current.posts, complete: false, hide }));
+    if (known.length === 0) return { changed: false, posts: 0, complete: false, error: e.message };
+    const posts = await withPhotos(mergePosts({ fresh: [], current: known, complete: false, hide }));
     return { ...(await write(posts)), complete: false, error: e.message };
   }
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-  const result = await run({ root, hide: hideList(process.env.FB_HIDE) });
+  const result = await run({ root, hide: hideList(process.env.FB_HIDE), seed: seedList(process.env.FB_SEED) });
   console.log(`${result.posts} posts${result.complete ? ' (full list from Facebook)' : ''}${result.changed ? ', changed' : ''}`);
   if (process.env.GITHUB_OUTPUT) await fs.appendFile(process.env.GITHUB_OUTPUT, `changed=${result.changed}\n`);
   if (result.error) process.exitCode = 1;
