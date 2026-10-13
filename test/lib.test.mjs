@@ -122,6 +122,15 @@ test('needs: valid rows, hidden rows, bad rows reported', () => {
   assert.equal(errors.filter((e) => !e.skipped && e.row === 8).length, 3);
 });
 
+test('needs: Cyrillic look-alikes become Latin; clear reasons for bad codes', () => {
+  // "А001" and "XCВ" are typed with Cyrillic А and В.
+  const csv = ['Код,Заглавие,Цел €', 'А001,Кирилско А,100', '1,Само цифра,100', 'N-ЛОШ,Кирилица,100', 'XCВ,Смесен,100'].join('\n');
+  const { rows, errors } = parseNeeds(csv, { allowedHosts: HOSTS });
+  assert.deepEqual(rows.map((r) => r.code), ['A001', 'XCB']);
+  assert.match(errors.find((e) => e.row === 3).message, /„1“ трябва да е поне 2 знака\. Таблицата маха нулите/);
+  assert.match(errors.find((e) => e.row === 4).message, /само латински букви/);
+});
+
 test('needs: unpublished sheet or missing column is fatal', () => {
   assert.match(parseNeeds('<!DOCTYPE html><html>', { allowedHosts: HOSTS }).fatal, /публикувана/);
   assert.match(parseNeeds('Код,Заглавие\nN1,X', { allowedHosts: HOSTS }).fatal, /Цел €/);

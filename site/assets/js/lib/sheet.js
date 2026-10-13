@@ -21,6 +21,15 @@ const NEEDS_COLUMNS = {
   deadline: 'Срок',
 };
 const NEEDS_REQUIRED = ['code', 'title', 'goal'];
+// Cyrillic capitals that look Latin: a Bulgarian keyboard types "А001" for "A001". Codes stay ASCII for bank transfers.
+const LOOKALIKE = { А: 'A', В: 'B', Е: 'E', К: 'K', М: 'M', Н: 'H', О: 'O', Р: 'P', С: 'C', Т: 'T', У: 'Y', Х: 'X' };
+
+function codeProblem(code) {
+  if (/[^A-Z0-9-]/.test(code)) return 'може да има само латински букви, цифри и тире';
+  // Google Sheets turns 001 into 1.
+  if (code.length < 2) return /^\d+$/.test(code) ? 'трябва да е поне 2 знака. Таблицата маха нулите отпред, затова започнете с буква' : 'трябва да е поне 2 знака';
+  return code.length > 16 ? 'може да е най-много 16 знака' : null;
+}
 
 const GAMES_COLUMNS = {
   show: 'Покажи',
@@ -83,8 +92,9 @@ export function parseNeeds(text, { allowedHosts }) {
     const problem = (message, skipped = true) => errors.push({ row: rowNumber, message, skipped });
     if (!parseBool(get('show'), true)) continue;
 
-    const code = get('code').toUpperCase();
-    if (!/^[A-Z0-9-]{2,16}$/.test(code)) { problem('Невалиден код (само латински букви, цифри и тире, 2–16 знака).'); continue; }
+    const code = get('code').toUpperCase().replace(/[АВЕКМНОРСТУХ]/g, (c) => LOOKALIKE[c]);
+    const bad = codeProblem(code);
+    if (bad) { problem(`Кодът „${get('code')}“ ${bad}, например N001.`); continue; }
     if (seen.has(code)) { problem(`Кодът ${code} се повтаря.`); continue; }
     const title = get('title');
     if (!title) { problem('Липсва заглавие.'); continue; }
