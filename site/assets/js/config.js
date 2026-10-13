@@ -6,7 +6,7 @@ export default {
   sheet: {
     needs: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSe3OvETse7xrCYwQWFTTL4DGovVGgD8I81-0kpLsCQUe4hNoL39UGp2qSRg2FoZfTu8eh4Vr5xrfIn/pub?gid=1622944424&single=true&output=csv', // tab "Нужди"
     games: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSe3OvETse7xrCYwQWFTTL4DGovVGgD8I81-0kpLsCQUe4hNoL39UGp2qSRg2FoZfTu8eh4Vr5xrfIn/pub?gid=2020671794&single=true&output=csv', // tab "Мачове"
-    packages: '', // tab "Пакети"
+    packages: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSe3OvETse7xrCYwQWFTTL4DGovVGgD8I81-0kpLsCQUe4hNoL39UGp2qSRg2FoZfTu8eh4Vr5xrfIn/pub?gid=1210437501&single=true&output=csv', // tab "Пакети"
   },
 
   // Online payment link for "Общо за клуба", shown only when the Sheet has no open causes (not connected,
