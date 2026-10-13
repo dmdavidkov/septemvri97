@@ -2,7 +2,8 @@
 
 Static site for БК Септември 97, a women's basketball club in Sofia. It's hosted on GitHub Pages from `site/`, and the repository is public.
 
-- **No build step and no framework.** The site is plain HTML, CSS and ES modules. Node is only for tests (`npm test`), the BFB scraper and the local server. Dependencies: cheerio only, used by the scraper.
+- **No build step and no framework.** The site is plain HTML, CSS and ES modules. Node is only for tests (`npm test`), the BFB scraper, the local server and the match link previews. Dependencies: cheerio only, used by the scraper.
+- **Match link previews** (`site/m/<game>.html` and `.jpg`) are made when the site is published (`npm run cards`, with the runner's Chrome) and never committed. They exist only for BFB games, and the picture comes from `drawCard` in `share.js`. The `?v=` in their links changes with the game (`shareVersion`), because Facebook keeps a preview for weeks.
 - **Relative URLs** for every asset and data file, because the site also runs under `dmdavidkov.github.io/septemvri97/`. Only canonical, OG, JSON-LD and sitemap URLs are absolute (`https://www.septemvri97.eu/`).
 - **Sheet content is untrusted.** Render it with `textContent` and the `el()` helper in `site/assets/js/lib/dom.js`, never with `innerHTML`. Payment links must pass `checkPayUrl` (exact allow-listed https hosts), and game links must pass `checkLinkUrl`.
 - **CSP lives in a `<meta>` tag** in `index.html`. That means no inline scripts, styles or `style=""` attributes. Setting styles through JS (`el.style`) is fine.

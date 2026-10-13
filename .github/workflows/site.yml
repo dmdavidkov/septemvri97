@@ -81,6 +81,12 @@ jobs:
           FB_SEED: ${{ secrets.FB_SEED }}
         run: npm run posts
 
+      # Link previews of shared matches (site/m/), drawn with the runner's Chrome. Published only, never committed.
+      - name: Make the match link previews
+        if: github.event_name != 'schedule' || steps.commit.outputs.changed == 'true' || steps.posts.outputs.changed == 'true'
+        continue-on-error: true
+        run: npm run cards
+
       - uses: actions/upload-pages-artifact@v5
         if: github.event_name != 'schedule' || steps.commit.outputs.changed == 'true' || steps.posts.outputs.changed == 'true'
         with:

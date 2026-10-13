@@ -55,9 +55,7 @@ function statusBadge(g, status) {
   if (status === 'played') {
     const result = ourResult(g);
     if (!result) return null;
-    return el('span', { class: cls('badge', result) },
-      el('span', { 'aria-hidden': 'true', text: result === 'win' ? 'П' : 'З' }),
-      el('span', { class: 'sr-only', text: result === 'win' ? 'Победа' : 'Загуба' }));
+    return el('span', { class: cls('result', result), text: result === 'win' ? 'Победа' : 'Загуба' });
   }
   if (status === 'live') return el('span', { class: 'pill live', text: 'На живо' });
   if (status === 'pending') return el('span', { class: 'pill pending', title: 'Очаква се резултат' }, 'Очаква се', el('span', { class: 'pill-more', text: ' резултат' }));
@@ -76,13 +74,15 @@ function tvLink(g, status, labels = { upcoming: 'Излъчване в BFB TV', 
   return el('a', { class: 'tv-link', href: g.liveUrl, target: '_blank', rel: 'noopener', text: labels[status] });
 }
 
-// What share.js needs to draw and describe a game.
-function shareModel(g, team, now) {
+// What share.js needs to draw and describe a game (scripts/share-cards.mjs uses it too). Only BFB games get a
+// link preview page (m/<id>.html), since Sheet games are read in the browser.
+export function shareModel(g, team, now = Date.now()) {
   const side = (s) => ({ name: s.name, isUs: s.isUs, logo: logoSrc(s), initials: initials(s.name) });
   return {
     id: g.id, date: g.date, time: g.time, status: gameStatus(g, now), team: team?.label ?? g.team, tag: team?.short ?? g.team,
     competition: competitionText(g), venue: g.venue ? venueText(g.venue) : null,
     home: side(g.home), away: side(g.away), score: g.score, result: ourResult(g), tv: g.liveUrl,
+    card: g.source === 'bfb',
   };
 }
 
@@ -90,10 +90,10 @@ const share = async (g, team) => (await import('./share.js')).openShare(shareMod
 
 function shareButton(g, team) {
   return el('button', {
-    type: 'button', class: 'share-btn', title: 'Сподели',
+    type: 'button', class: 'share-btn',
     'aria-label': `Сподели мача ${g.home.name} – ${g.away.name}`,
     onclick: () => share(g, team),
-  });
+  }, 'Сподели');
 }
 
 function gameRow(g, team, now) {

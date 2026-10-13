@@ -8,3 +8,6 @@ Thumbs.db
 # Copied from Facebook at publish time only; never committed (the repository is public).
 site/data/posts.json
 site/assets/fb/
+
+# Link previews of shared matches, made at publish time (scripts/share-cards.mjs).
+site/m/
