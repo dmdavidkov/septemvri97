@@ -41,7 +41,7 @@
   --focus: var(--ink);
 }
 
-.dark, .site-header, .site-footer, .donate-panel, .tier-top, .card.training, .share-dialog {
+.dark, .site-header, .site-footer, .donate-panel, .tier-top, .card.training, .share-dialog, .thanks-dialog {
   --text: var(--chalk);
   --muted: rgba(252, 252, 252, .72);
   --accent: var(--coral);
@@ -387,10 +387,38 @@ button { font: inherit; color: inherit; }
 
 /* Donations */
 .notice { margin: 24px 0 0; padding: 12px 16px; border: 1px solid #E5C35F; border-radius: 12px; background: #FFF5D9; color: #4A3900; font-size: .95rem; }
-/* Donors coming back from the payment page (?dar=…). */
-.thanks { margin: 24px 0 0; padding: 16px 20px; border-left: 4px solid var(--red); border-radius: 12px; background: var(--white); box-shadow: var(--shadow); }
-.thanks strong { display: block; font: 800 1.1rem/1.3 var(--font-display); letter-spacing: -.01em; }
-.thanks p { margin: 4px 0 0; color: var(--muted); }
+/* Donors coming back from the payment page (?dar=…): the emblem pops in and confetti bursts out of it. */
+.thanks-dialog {
+  width: min(440px, calc(100% - 2 * var(--gutter))); max-height: calc(100% - 2 * var(--gutter)); padding: 40px 24px 24px;
+  border: 1px solid rgba(252, 252, 252, .12); border-radius: 22px; overflow: auto; text-align: center;
+  background-color: var(--ink-2); background-image: var(--grid); background-size: 44px 44px;
+  animation: thanks-in .35s ease-out both;
+}
+.thanks-dialog::backdrop { background: rgba(11, 10, 12, .74); }
+.thanks-mark { position: relative; display: block; width: 96px; height: 96px; margin: 0 auto 22px; }
+.thanks-mark img { position: relative; width: 100%; height: 100%; animation: thanks-pop .6s .1s cubic-bezier(.2, .9, .3, 1.35) both; }
+.thanks-confetti i {
+  position: absolute; left: calc(50% - 4px); top: calc(50% - 6px); width: 8px; height: 12px; border-radius: 2px;
+  background: var(--c); opacity: 0;
+  animation: thanks-burst 1.1s calc(.25s + var(--d)) cubic-bezier(.15, .7, .3, 1) both;
+}
+.thanks-confetti i.round { width: 9px; height: 9px; border-radius: 50%; }
+.thanks-title { margin: 0 0 10px; font: 800 clamp(1.6rem, 1.3rem + 1.4vw, 2rem)/1.1 var(--font-display); letter-spacing: -.03em; }
+.thanks-text { margin: 0 auto; max-width: 34ch; color: var(--muted); }
+.thanks-text strong { color: var(--text); }
+.thanks-actions { display: grid; gap: 10px; margin-top: 26px; }
+@media (min-width: 420px) { .thanks-actions { grid-template-columns: 1fr 1fr; } }
+@keyframes thanks-in { from { opacity: 0; transform: translateY(16px) scale(.97); } }
+@keyframes thanks-pop { from { opacity: 0; transform: scale(.4) rotate(-40deg); } }
+@keyframes thanks-burst {
+  0% { opacity: 1; transform: translate(0, 0) scale(.4); }
+  70% { opacity: 1; }
+  100% { opacity: 0; transform: translate(var(--x), var(--y)) rotate(var(--r)) scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .thanks-dialog, .thanks-mark img { animation: none; }
+  .thanks-confetti { display: none; }
+}
 .donate { display: grid; gap: 20px; margin-top: 32px; }
 @media (min-width: 960px) {
   .donate:not(.single) { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); align-items: start; gap: 28px; }

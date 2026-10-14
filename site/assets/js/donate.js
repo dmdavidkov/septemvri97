@@ -69,6 +69,65 @@ function copyButton(value, label) {
 const bankRow = (label, shown, value = shown) =>
   el('div', { class: 'bank-row' }, el('dt', { text: label }), el('dd', { text: shown }), copyButton(value, label));
 
+function shareButton(cause, className) {
+  // The current address keeps working before and after the custom domain is connected.
+  const url = new URL(location.pathname, location.origin);
+  if (cause.code) url.searchParams.set('cause', cause.code);
+  url.hash = 'podkrepi';
+  const label = cause.code ? 'Сподели каузата' : 'Сподели с приятели';
+  const btn = el('button', { type: 'button', class: className }, label);
+  btn.addEventListener('click', async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: cause.title, text: `Подкрепете „${cause.title}“ – БК Септември 97`, url: url.href });
+      } catch { /* closed by the visitor */ }
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(url.href);
+      announce('Линкът е копиран.');
+      btn.textContent = 'Линкът е копиран';
+      setTimeout(() => { btn.textContent = label; }, 1800);
+    } catch {
+      announce('Копирането не успя.');
+    }
+  });
+  return btn;
+}
+
+const CONFETTI = ['#DA162D', '#F64E5A', '#FCFCFC', '#E5C35F'];
+
+// Donors coming back from the payment page: a popup they can't miss, with the emblem and a burst of confetti.
+function thankYou(cause) {
+  const confetti = el('span', { class: 'thanks-confetti' });
+  for (let i = 0; i < 18; i++) {
+    const angle = (i / 18) * 2 * Math.PI + Math.random() * 0.3;
+    const distance = 72 + Math.random() * 56;
+    const piece = el('i', { class: i % 3 ? null : 'round' });
+    piece.style.setProperty('--x', `${Math.round(Math.cos(angle) * distance)}px`);
+    piece.style.setProperty('--y', `${Math.round(Math.sin(angle) * distance - 16)}px`);
+    piece.style.setProperty('--r', `${Math.round(Math.random() * 540 - 270)}deg`);
+    piece.style.setProperty('--c', CONFETTI[i % CONFETTI.length]);
+    piece.style.setProperty('--d', `${Math.round(Math.random() * 120)}ms`);
+    confetti.append(piece);
+  }
+  const done = el('button', { type: 'button', class: 'btn btn-ghost', autofocus: true }, 'Затвори');
+  const close = el('button', { type: 'button', class: 'share-close', 'aria-label': 'Затвори' });
+  const dialog = el('dialog', { class: 'thanks-dialog', 'aria-labelledby': 'thanks-title', 'aria-describedby': 'thanks-text' },
+    el('span', { class: 'thanks-mark', 'aria-hidden': 'true' }, confetti, el('img', { src: 'assets/img/emblem.svg', width: 96, height: 96, alt: '' })),
+    el('h2', { class: 'thanks-title', id: 'thanks-title', text: 'Благодарим ви!' }),
+    el('p', { class: 'thanks-text', id: 'thanks-text' },
+      cause ? ['Подкрепихте ', el('strong', { text: `„${cause.title}“` }), '. '] : null,
+      'Дарението ви ще се добави към събраната сума до около половин час.'),
+    el('div', { class: 'thanks-actions' }, shareButton(cause || GENERAL, 'btn btn-primary'), done),
+    close);
+  for (const btn of [done, close]) btn.addEventListener('click', () => dialog.close());
+  dialog.addEventListener('click', (e) => { if (e.target === dialog) dialog.close(); });
+  dialog.addEventListener('close', () => dialog.remove());
+  document.body.append(dialog);
+  dialog.showModal();
+}
+
 export function initDonate({ config, needs, notice }) {
   const donateEl = document.getElementById('donate');
   const causesEl = document.getElementById('causes');
@@ -96,13 +155,7 @@ export function initDonate({ config, needs, notice }) {
   noticeEl.hidden = !noticeEl.textContent;
 
   if (thanked) {
-    const cause = wanted && needs.find((n) => n.code === wanted);
-    const title = 'Благодарим за дарението!';
-    const text = `${cause ? `Подкрепихте „${cause.title}“. ` : ''}Дарението ви ще се добави към събраната сума до около половин час.`;
-    const box = document.getElementById('donate-thanks');
-    box.replaceChildren(el('strong', { text: title }), el('p', { text }));
-    box.hidden = false;
-    announce(`${title} ${text}`);
+    thankYou(wanted && needs.find((n) => n.code === wanted));
     // A reload or a shared link shouldn't thank again.
     const url = new URL(location.href);
     url.searchParams.delete('dar');
@@ -163,31 +216,7 @@ export function initDonate({ config, needs, notice }) {
       el('a', { class: 'btn btn-ghost btn-small', href: mailto(config.email, `Дарение/спонсорство – ${what}`, body) }, 'Изпратете запитване'));
   }
 
-  function shareBlock(cause) {
-    // The current address keeps working before and after the custom domain is connected.
-    const url = new URL(location.pathname, location.origin);
-    if (cause.code) url.searchParams.set('cause', cause.code);
-    url.hash = 'podkrepi';
-    const label = cause.code ? 'Сподели каузата' : 'Сподели с приятели';
-    const btn = el('button', { type: 'button', class: 'btn btn-ghost btn-small' }, label);
-    btn.addEventListener('click', async () => {
-      if (navigator.share) {
-        try {
-          await navigator.share({ title: cause.title, text: `Подкрепете „${cause.title}“ – БК Септември 97`, url: url.href });
-        } catch { /* closed by the visitor */ }
-        return;
-      }
-      try {
-        await navigator.clipboard.writeText(url.href);
-        announce('Линкът е копиран.');
-        btn.textContent = 'Линкът е копиран';
-        setTimeout(() => { btn.textContent = label; }, 1800);
-      } catch {
-        announce('Копирането не успя.');
-      }
-    });
-    return el('div', { class: 'panel-actions' }, btn);
-  }
+  const shareBlock = (cause) => el('div', { class: 'panel-actions' }, shareButton(cause, 'btn btn-ghost btn-small'));
 
   let head;
   let body;
