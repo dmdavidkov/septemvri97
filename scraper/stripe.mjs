@@ -50,8 +50,8 @@ export async function run({ root, key, fetchImpl = fetch, live = LIVE, needsUrl 
     const res = await fetchImpl(url, { headers, signal: AbortSignal.timeout(20_000) });
     if (!res.ok) {
       // Stripe says what is wrong, e.g. a permission the restricted key lacks. Its message shows the key's ends
-      // ("rk_live_****abcd"); the Actions log is public, so that part goes.
-      const reason = (await res.json().catch(() => null))?.error?.message?.replace(/\S*\*{3,}\S*/g, '…');
+      // ("rk_live_****abcd", 'rk_live_...abcd'); the Actions log is public, so that part goes.
+      const reason = (await res.json().catch(() => null))?.error?.message?.replace(/'?\b[rs]k_(?:test|live)_\S*|\S*\*{3,}\S*/g, '…');
       throw new Error(`${what}: HTTP ${res.status}${reason ? ` (${reason})` : ''}`);
     }
     return res;

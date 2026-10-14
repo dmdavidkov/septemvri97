@@ -105,13 +105,17 @@ test('run: totals for the causes\' links only; live totals kept on errors', asyn
 
   // A key without a permission: Stripe's reason is logged without the key's ends, and the live totals stay.
   await reset();
-  const denied = new Response(JSON.stringify({ error: { message: "The provided key 'rk_test_*****e_up' does not have the required permissions." } }), { status: 403 });
+  const denied = new Response(JSON.stringify({ error: { message: "The provided key 'rk_test_...e_up' does not have the required permissions." } }), { status: 403 });
   ({ fetchImpl } = fakeFetch({ 'https://live.test/data/stripe.json': first, [NEEDS]: needsCsv, 'https://api.stripe.com/': denied }));
   result = await run({ ...opts, fetchImpl });
   assert.match(result.error, /HTTP 403 \(The provided key … does not have the required permissions\.\)/);
   assert.equal(result.changed, false);
   assert.deepEqual(await read(), first);
   assert.ok(logs.some((m) => /keeping the totals/.test(m)));
+  await reset();
+  const invalid = new Response(JSON.stringify({ error: { message: 'Invalid API Key provided: rk_test_****e_up' } }), { status: 401 });
+  ({ fetchImpl } = fakeFetch({ 'https://live.test/data/stripe.json': first, [NEEDS]: needsCsv, 'https://api.stripe.com/': invalid }));
+  assert.match((await run({ ...opts, fetchImpl })).error, /HTTP 401 \(Invalid API Key provided: …\)/);
   assert.ok(logs.every((m) => !m.includes('rk_test_') && !m.includes('*')));
 
   // Something else in the secret: Stripe isn't asked, the value isn't logged, the live totals stay.
