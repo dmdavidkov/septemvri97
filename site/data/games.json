@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-13T08:32:14.904Z",
+  "updated": "2026-10-14T05:27:05.074Z",
   "teams": [
     {
       "key": "women",
@@ -259,6 +259,31 @@
       "score": null,
       "liveUrl": null,
       "url": "https://comps.basketball.bg/game-385158"
+    },
+    {
+      "id": "bfb-385229",
+      "source": "bfb",
+      "team": "u12",
+      "competition": "Момичета 12г.",
+      "phase": "Северозапад - група Б",
+      "round": 4,
+      "date": "2026-10-25",
+      "time": "14:30",
+      "start": "2026-10-25T14:30:00+02:00",
+      "venue": "Септември - София",
+      "home": {
+        "name": "Септември 97",
+        "logo": "assets/logos/bfb/clubs-20250725084541.jpg",
+        "isUs": true
+      },
+      "away": {
+        "name": "Локомотив София",
+        "logo": "assets/logos/bfb/clubs-20251114115816.png",
+        "isUs": false
+      },
+      "score": null,
+      "liveUrl": null,
+      "url": "https://comps.basketball.bg/game-385229"
     },
     {
       "id": "bfb-384778",
@@ -559,31 +584,6 @@
       "score": null,
       "liveUrl": null,
       "url": "https://comps.basketball.bg/game-385164"
-    },
-    {
-      "id": "bfb-385229",
-      "source": "bfb",
-      "team": "u12",
-      "competition": "Момичета 12г.",
-      "phase": "Северозапад - група Б",
-      "round": 4,
-      "date": "2026-11-22",
-      "time": "14:30",
-      "start": "2026-11-22T14:30:00+02:00",
-      "venue": "Септември - София",
-      "home": {
-        "name": "Септември 97",
-        "logo": "assets/logos/bfb/clubs-20250725084541.jpg",
-        "isUs": true
-      },
-      "away": {
-        "name": "Локомотив София",
-        "logo": "assets/logos/bfb/clubs-20251114115816.png",
-        "isUs": false
-      },
-      "score": null,
-      "liveUrl": null,
-      "url": "https://comps.basketball.bg/game-385229"
     },
     {
       "id": "bfb-385132",
