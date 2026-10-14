@@ -265,7 +265,7 @@ export function createGames() {
   const $ = (id) => document.getElementById(id);
   const ui = {
     controls: $('games-controls'), chips: $('team-chips'), list: $('games-list'), empty: $('games-empty'),
-    more: $('games-more'), bfb: $('games-bfb'), updated: $('games-updated'), ticket: $('next-match'),
+    more: $('games-more'), bfb: $('games-bfb'), updated: $('games-updated'), ticket: $('next-match'), season: $('games-season'),
     views: [...document.querySelectorAll('.seg [data-view]')],
   };
   const state = { data: null, failed: false, sheet: [], team: 'all', view: null, limit: PAGE_SIZE, focus: new URLSearchParams(location.search).get('game') };
@@ -325,10 +325,13 @@ export function createGames() {
     ui.list.replaceChildren(...shown.slice(0, state.limit).map((g) => gameRow(g, teams.get(g.team), now)));
     ui.more.hidden = shown.length <= state.limit;
 
+    // BFB's current season ("2026/2027"); earlier seasons aren't shown, so the section names it.
+    const season = state.data?.season;
+    if (season) ui.season.textContent = `Сезон ${season}`;
     ui.empty.hidden = shown.length > 0;
     if (state.failed && !games.length) ui.empty.textContent = 'Програмата не успя да се зареди. Вижте я в сайта на БФБ.';
     else if (state.view === 'upcoming') ui.empty.textContent = 'Няма предстоящи мачове в програмата.';
-    else ui.empty.textContent = 'Още няма изиграни мачове този сезон.';
+    else ui.empty.textContent = season ? `Още няма изиграни мачове през сезон ${season}.` : 'Още няма изиграни мачове този сезон.';
 
     const team = teams.get(state.team);
     ui.bfb.href = team?.bfbUrl ?? DEFAULT_BFB;

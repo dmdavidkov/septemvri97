@@ -72,13 +72,14 @@ test('game page: round, venue, team ids; month "Септември" is a date, n
   assert.throws(() => parseGamePage('<html></html>'), /bar_top/);
 });
 
-// A fake BFB built from the fixtures; `broken` makes one team's schedule fail.
-async function fakeBfb(broken = new Set()) {
+// A fake BFB built from the fixtures; `broken` makes one team's schedule fail, `swap` replaces pages.
+async function fakeBfb(broken = new Set(), swap = {}) {
   const pages = {
     'team_games.inc.php?t_id=1890': await fixture('team_games_1890.html'),
     'team_games.inc.php?t_id=3672': await fixture('team_games_3672.html'),
     'game-384686': await fixture('game_384686_played.html'),
     'game-384690': await fixture('game_384690_upcoming.html'),
+    ...swap,
   };
   const calls = [];
   const fetchImpl = async (url) => {
@@ -107,6 +108,7 @@ test('scraper run: writes once, is stable, keeps a failing team', async () => {
   assert.deepEqual(r1.errors, []);
   assert.equal(r1.games, 22);
   const data = JSON.parse(await fs.readFile(path.join(dir, 'site/data/games.json'), 'utf8'));
+  assert.equal(data.season, '2026/2027');
   assert.equal(data.teams.length, 3);
   assert.equal(data.teams[2].bfbUrl, null);
 
@@ -145,6 +147,12 @@ test('scraper run: writes once, is stable, keeps a failing team', async () => {
   assert.deepEqual(r4.errors, []);
   assert.equal(r4.games, 22);
   assert.deepEqual(fourth.calls.filter((c) => c.startsWith('team_games')), ['team_games.inc.php?t_id=1890']);
+
+  // A team with no games in BFB's selected season keeps its games, and the site keeps naming their season.
+  const fifth = await fakeBfb(new Set(), { 'team_games.inc.php?t_id=1890': await fixture('team_games_empty.html') });
+  const r5 = await run({ ...opts, fetchImpl: fifth.fetchImpl, only: ['women'] });
+  assert.equal(r5.changed, false);
+  assert.equal(JSON.parse(await fs.readFile(path.join(dir, 'site/data/games.json'), 'utf8')).season, '2026/2027');
 });
 
 test('teams playing now: from 2 hours before the start until the score, at most 6 hours after', () => {

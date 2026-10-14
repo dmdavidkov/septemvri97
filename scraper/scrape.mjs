@@ -13,6 +13,7 @@ const CLUB_NAMES = ['Септември 97'];
 const MAX_PAGE_FETCHES = 25;
 const VENUE_RETRY_DAYS = 7;
 const MAX_LOGO_BYTES = 500_000;
+const SEASON = /^\d{4}\/\d{4}$/;
 
 const SOON_BEFORE_H = 2;
 const SOON_AFTER_H = 6;
@@ -90,6 +91,8 @@ export async function run({ root, fetchImpl = fetch, delayMs = 1000, now = new D
   const errors = [];
   const games = [];
   let pageFetches = 0;
+  // The season the site names ("2026/2027"): the newest one a team's games were read from, else the previous one.
+  let season = null;
 
   for (const team of teams) {
     if (!team.tId) continue;
@@ -111,6 +114,7 @@ export async function run({ root, fetchImpl = fetch, delayMs = 1000, now = new D
       games.push(...previous);
       continue;
     }
+    if (SEASON.test(parsed.season.name ?? '') && (!season || parsed.season.id > season.id)) season = parsed.season;
 
     for (const g of parsed.games) {
       if (!g.date) {
@@ -172,10 +176,11 @@ export async function run({ root, fetchImpl = fetch, delayMs = 1000, now = new D
 
   games.sort((a, b) => Date.parse(a.start) - Date.parse(b.start) || a.id.localeCompare(b.id));
   const data = {
+    season: season?.name ?? prev.season ?? null,
     teams: teams.map(({ key, label, short, page }) => ({ key, label, short, bfbUrl: page ? `${BFB}${page}` : null })),
     games,
   };
-  const changed = JSON.stringify(data) !== JSON.stringify({ teams: prev.teams, games: prev.games });
+  const changed = JSON.stringify(data) !== JSON.stringify({ season: prev.season ?? null, teams: prev.teams, games: prev.games });
   if (changed) {
     await fs.mkdir(path.dirname(outFile), { recursive: true });
     await fs.writeFile(outFile, `${JSON.stringify({ updated: now.toISOString(), ...data }, null, 2)}\n`);
