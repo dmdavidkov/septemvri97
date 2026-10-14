@@ -151,6 +151,21 @@ test('run: the newest post joins the live ones; live posts kept on errors', asyn
   }));
   assert.equal((await run({ ...opts, fetchImpl })).changed, false);
 
+  // Between the 30-minute checks (--keep): Facebook isn't asked, the live posts and photos go into the publish.
+  await reset();
+  ({ fetchImpl, calls } = fakeFetch({
+    'https://live.test/data/posts.json': JSON.stringify(second),
+    'https://live.test/assets/fb/': jpeg(),
+    'https://www.facebook.com/profile.php': pageHtml([story(5)]),
+  }));
+  result = await run({ ...opts, fetchImpl, keep: true });
+  assert.deepEqual(result, { changed: false, posts: 2, error: null });
+  assert.deepEqual(await read(), second);
+  await fs.access(path.join(root, 'site/assets/fb/3.jpg'));
+  assert.deepEqual(calls.filter((c) => !c.url.startsWith('https://live.test/')), []);
+  ({ fetchImpl } = fakeFetch({}));
+  assert.deepEqual(await run({ ...opts, fetchImpl, keep: true }), { changed: false, posts: 0, error: null });
+
   // Facebook changed its page: the live posts stay (minus a hidden one) and the run reports the error.
   await reset();
   ({ fetchImpl } = fakeFetch({

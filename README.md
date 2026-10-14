@@ -19,7 +19,7 @@
 
 ## За програмисти
 
-Сайтът е обикновен HTML, CSS и JavaScript в `site/`, без компилиране. GitHub Actions (`.github/workflows/site.yml`) го тества и публикува в GitHub Pages и на всеки 30 минути обновява програмата от БФБ, новините от Facebook и даренията от Stripe. Правилата на проекта са в [CLAUDE.md](CLAUDE.md).
+Сайтът е обикновен HTML, CSS и JavaScript в `site/`, без компилиране. GitHub Actions (`.github/workflows/site.yml`) го тества и публикува в GitHub Pages и обновява даренията от Stripe и мачовете в деня на игра на всеки 10 минути, а новините от Facebook – на всеки 30 минути. Отворената страница проверява за нови резултати и суми всяка минута. Правилата на проекта са в [CLAUDE.md](CLAUDE.md).
 
 ```bash
 npm ci

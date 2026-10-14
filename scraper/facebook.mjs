@@ -5,6 +5,8 @@
 // from GitHub's servers), so each run adds that post to the ones already on the live site and the site keeps
 // the latest few over time. Photos are downloaded only for posts the site doesn't have yet.
 // If the page can't be read, the live posts are kept and the run exits with code 1.
+// With --keep (the publishes between the 30-minute checks) Facebook isn't asked: the live posts and their photos are
+// carried into the new publish as they are, minus any in FB_HIDE.
 //
 // Filling the site after a gap: save Facebook's "more posts" answer from a logged-out browser (DevTools →
 // Network → graphql), run `node scraper/facebook.mjs --seed <file>`, put the output in the temporary secret
@@ -171,7 +173,7 @@ export function mergePosts({ fresh, current = [], hide = [] }) {
     .slice(0, MAX_POSTS);
 }
 
-export async function run({ root, fetchImpl = fetch, live = LIVE, log = console.log, hide = [], seed = [] }) {
+export async function run({ root, fetchImpl = fetch, live = LIVE, log = console.log, hide = [], seed = [], keep = false }) {
   const outFile = path.join(root, 'site/data/posts.json');
   const imageDir = path.join(root, 'site/assets/fb');
 
@@ -225,6 +227,11 @@ export async function run({ root, fetchImpl = fetch, live = LIVE, log = console.
     return { changed: !current || JSON.stringify(current.posts) !== JSON.stringify(posts), posts: posts.length };
   }
 
+  if (keep) {
+    if (known.length === 0) return { changed: false, posts: 0, error: null };
+    return { ...(await write(await withPhotos(mergePosts({ fresh: [], current: known, hide })))), error: null };
+  }
+
   try {
     const page = await get(PAGE, 'Facebook page', { headers: PAGE_HEADERS });
     const fresh = toPosts(parsePage(await page.text()).stories).slice(0, 1);
@@ -245,7 +252,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     console.log(JSON.stringify(toPosts(parseTimeline(await fs.readFile(file, 'utf8')).stories)));
   } else {
     const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-    const result = await run({ root, hide: hideList(process.env.FB_HIDE), seed: seedList(process.env.FB_SEED) });
+    const result = await run({ root, hide: hideList(process.env.FB_HIDE), seed: seedList(process.env.FB_SEED), keep: process.argv.includes('--keep') });
     console.log(`${result.posts} posts${result.changed ? ', changed' : ''}`);
     if (process.env.GITHUB_OUTPUT) await fs.appendFile(process.env.GITHUB_OUTPUT, `changed=${result.changed}\n`);
     if (result.error) process.exitCode = 1;

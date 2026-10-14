@@ -21,6 +21,17 @@ async function fetchText(url) {
   return res.text();
 }
 
+// The site's own data files (games.json, stripe.json). no-cache too: GitHub Pages lets browsers reuse files for
+// 10 minutes; this asks the server (a cheap 304 if unchanged). The text tells a later check whether anything is new.
+async function fetchData(url) {
+  try {
+    const text = await fetchText(url);
+    return { text, data: JSON.parse(text) };
+  } catch {
+    return null;
+  }
+}
+
 function tabSource(key, sample) {
   if (demo) return { url: sample, label: 'примерни данни (?demo)' };
   if (config.sheet[key]) return { url: config.sheet[key], label: 'Google таблица' };
@@ -103,16 +114,21 @@ const gamesSource = tabSource('games', 'data/sample-games.csv');
 const needsSource = tabSource('needs', 'data/sample-needs.csv');
 const packagesSource = tabSource('packages', 'data/sample-packages.csv');
 
-// Card donations per Stripe link, added up when the site is published (scraper/stripe.mjs). no-cache as for
-// games.json below.
-const stripeDone = demo ? Promise.resolve(null) : fetch('data/stripe.json', { cache: 'no-cache' })
-  .then((res) => (res.ok ? res.json() : null))
-  .catch(() => null);
+// What the page shows from the data files, to tell whether a later check brought anything new.
+const shown = { games: null, stripe: null };
+let updateTotals = null;
+
+// Card donations per Stripe link, added up when the site is published (scraper/stripe.mjs).
+const stripeDone = demo ? Promise.resolve(null) : fetchData('data/stripe.json').then((got) => {
+  shown.stripe = got?.text ?? null;
+  return got?.data ?? null;
+});
 
 const needsDone = Promise.all([loadTab(needsSource, (text) => parseNeeds(text, { allowedHosts: config.payHosts })), stripeDone])
   .then(([result, stripe]) => {
     const needs = { ...result, rows: addOnline(result.rows, stripe?.eurCents), stripe };
-    initDonate({ config, needs: needs.rows, notice: demo ? 'Показани са примерни каузи (?demo).' : '' });
+    const donate = initDonate({ config, needs: needs.rows, notice: demo ? 'Показани са примерни каузи (?demo).' : '' });
+    updateTotals = (eurCents) => donate.update(addOnline(result.rows, eurCents));
     return needs;
   });
 
@@ -121,14 +137,11 @@ const packagesDone = loadTab(packagesSource, (text) => parsePackages(text, { all
   return result;
 });
 
-// no-cache: GitHub Pages lets browsers reuse files for 10 minutes; this asks the server (a cheap 304 if unchanged).
-const bfbDone = fetch('data/games.json', { cache: 'no-cache' })
-  .then((res) => (res.ok ? res.json() : null))
-  .catch(() => null)
-  .then((data) => {
-    games.setData(data);
-    return data;
-  });
+const bfbDone = fetchData('data/games.json').then((got) => {
+  shown.games = got?.text ?? null;
+  games.setData(got?.data ?? null);
+  return got?.data ?? null;
+});
 
 // Sheet games need the team list from games.json to recognise "U17", "Жени", ….
 const sheetGamesDone = Promise.all([bfbDone, gamesSource ? fetchText(gamesSource.url).then((t) => ({ t }), (e) => ({ e })) : null])
@@ -139,6 +152,35 @@ const sheetGamesDone = Promise.all([bfbDone, gamesSource ? fetchText(gamesSource
     games.setSheetGames(result.rows);
     return result;
   });
+
+// While the page stays open, new scores, BFB TV links and card totals appear without a reload: the two files are
+// checked every minute while the tab is in view, and again as soon as the visitor comes back to it. The site
+// publishes them every 10 minutes at most.
+const REFRESH_MS = 60_000;
+let checkedAt = Date.now();
+
+async function refresh() {
+  if (document.hidden) return;
+  checkedAt = Date.now();
+  const [bfb, stripe] = await Promise.all([fetchData('data/games.json'), fetchData('data/stripe.json')]);
+  if (bfb && bfb.text !== shown.games) {
+    shown.games = bfb.text;
+    games.setData(bfb.data);
+  }
+  if (stripe && stripe.text !== shown.stripe) {
+    shown.stripe = stripe.text;
+    updateTotals?.(stripe.data?.eurCents);
+  }
+}
+
+if (!demo) {
+  Promise.all([needsDone, bfbDone]).then(() => {
+    setInterval(refresh, REFRESH_MS);
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden && Date.now() - checkedAt > REFRESH_MS) refresh();
+    });
+  });
+}
 
 if (check) {
   Promise.all([needsDone, sheetGamesDone, packagesDone, bfbDone]).then(([needs, sheetGames, packages]) => renderCheck([

@@ -295,8 +295,10 @@ export function createGames() {
     }
   }
 
-  // Built once per data load; render() only flips aria-pressed, so keyboard focus stays on the chip.
+  // Built once per data load; render() only flips aria-pressed, so keyboard focus stays on the chip. New data while
+  // the page is open (main.js) rebuilds them, and the focus moves to the new chip.
   function renderChips() {
+    const focused = ui.chips.contains(document.activeElement) ? document.activeElement.dataset.team : null;
     const used = new Set(games.map((g) => g.team));
     const options = [['all', 'Всички'], ...[...teams.values()].filter((t) => used.has(t.key)).map((t) => [t.key, t.short])];
     if (!options.some(([key]) => key === state.team)) state.team = 'all';
@@ -307,6 +309,7 @@ export function createGames() {
       'data-team': key,
       onclick: () => { state.team = key; state.limit = PAGE_SIZE; render(); },
     }, label)));
+    if (focused) ui.chips.querySelector(`[data-team="${CSS.escape(focused)}"]`)?.focus({ preventScroll: true });
   }
 
   function render() {

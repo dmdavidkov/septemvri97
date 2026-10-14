@@ -4,14 +4,16 @@ on:
   # Every commit to main is tested and published.
   push:
     branches: [main]
-  # Every 3 hours from 05:15 to 20:15 UTC: the BFB schedule (committed if it changed), the Facebook posts and the
-  # Stripe totals.
-  # Every 30 minutes at :25 and :55: the Facebook posts (each run can add only the newest one), the Stripe
-  # donation totals, and BFB only for teams playing around then, so BFB TV links and final scores show up quickly.
-  # A scheduled run publishes only if something changed.
+  # Every 3 hours from 05:10 to 20:10 UTC: the whole BFB schedule (committed if it changed), the Facebook posts and
+  # the Stripe totals.
+  # Every 10 minutes: the Stripe donation totals and BFB only for teams playing around then, so card donations,
+  # BFB TV links and final scores show up quickly. Facebook only every 30 minutes, at :25 and :55 (each run can add
+  # only the newest post): it rate-limits GitHub's servers.
+  # A scheduled run publishes only if something changed. GitHub often starts scheduled runs 5–20 minutes late.
   schedule:
-    - cron: '15 5-20/3 * * *'
+    - cron: '10 5-20/3 * * *'
     - cron: '25,55 * * * *'
+    - cron: '5,15,35,45 * * * *'
   # "Run workflow" button in the Actions tab: refresh the schedule and publish now.
   workflow_dispatch:
 
@@ -23,6 +25,11 @@ permissions:
 concurrency:
   group: pages
   cancel-in-progress: false
+
+# The schedules above, so the steps can tell the runs apart. Change them together.
+env:
+  FULL: '10 5-20/3 * * *'
+  QUICK: '5,15,35,45 * * * *'
 
 jobs:
   build:
@@ -54,7 +61,7 @@ jobs:
         env:
           SCHEDULE: ${{ github.event.schedule }}
         run: |
-          if [ "$SCHEDULE" = '25,55 * * * *' ]; then npm run scrape -- --soon; else npm run scrape; fi
+          if [ "$SCHEDULE" = "$FULL" ] || [ -z "$SCHEDULE" ]; then npm run scrape; else npm run scrape -- --soon; fi
 
       # Pushes made with GITHUB_TOKEN don't start another run, so this can't loop.
       - name: Commit the new schedule
@@ -73,17 +80,6 @@ jobs:
           git push
           echo "changed=true" >> "$GITHUB_OUTPUT"
 
-      # Posts and their photos go only into the published site, never into the public repository.
-      - name: Copy the latest Facebook posts
-        id: posts
-        continue-on-error: true
-        env:
-          # Repository variable: links of posts the site must not show (wiki: Новини от Facebook).
-          FB_HIDE: ${{ vars.FB_HIDE }}
-          # Temporary secret for filling the site after a gap (CLAUDE.md). Delete it after one run.
-          FB_SEED: ${{ secrets.FB_SEED }}
-        run: npm run posts
-
       # Card donations per cause, added to "Събрано €" on the site. A total per link only, published, never committed.
       - name: Add up the Stripe donations
         id: stripe
@@ -92,6 +88,21 @@ jobs:
           # Restricted key with read access (wiki: Stripe). Without it the step does nothing.
           STRIPE_KEY: ${{ secrets.STRIPE_KEY }}
         run: npm run stripe
+
+      # Posts and their photos go only into the published site, never into the public repository. The quick runs
+      # don't ask Facebook: when they publish, they carry the live posts over (--keep).
+      - name: Copy the latest Facebook posts
+        id: posts
+        if: github.event.schedule != env.QUICK || steps.commit.outputs.changed == 'true' || steps.stripe.outputs.changed == 'true'
+        continue-on-error: true
+        env:
+          SCHEDULE: ${{ github.event.schedule }}
+          # Repository variable: links of posts the site must not show (wiki: Новини от Facebook).
+          FB_HIDE: ${{ vars.FB_HIDE }}
+          # Temporary secret for filling the site after a gap (CLAUDE.md). Delete it after one run.
+          FB_SEED: ${{ secrets.FB_SEED }}
+        run: |
+          if [ "$SCHEDULE" = "$QUICK" ]; then npm run posts -- --keep; else npm run posts; fi
 
       # Link previews of shared matches (site/m/), drawn with the runner's Chrome. Published only, never committed.
       - name: Make the match link previews
@@ -117,9 +128,9 @@ jobs:
 
   # Runs after publishing whatever did update, so one broken part doesn't hold back the rest.
   # A red run here makes GitHub email the repo owner. Facebook can be unreadable for hours, so on
-  # scheduled runs its errors turn the run red only once a day, on the first BFB run (05:15 UTC). So do Stripe's,
+  # scheduled runs its errors turn the run red only once a day, on the first full run (05:10 UTC). So do Stripe's,
   # which usually mean the key was deleted or lacks a permission. BFB errors turn it red on the 3-hourly runs
-  # only, not on the quick 30-minute checks.
+  # only, not on the quick checks.
   report:
     needs: [build, deploy]
     if: always() && (needs.build.outputs.scrape == 'failure' || needs.build.outputs.posts == 'failure' || needs.build.outputs.stripe == 'failure')
@@ -130,18 +141,18 @@ jobs:
           SCHEDULE: ${{ github.event.schedule }}
         run: |
           echo "::error::The BFB update failed for at least one team; its previous games were kept. See the 'Update the schedule from BFB' step."
-          if [ "$SCHEDULE" != '25,55 * * * *' ]; then exit 1; fi
+          if [ "$SCHEDULE" = "$FULL" ] || [ -z "$SCHEDULE" ]; then exit 1; fi
       - if: needs.build.outputs.posts == 'failure'
         env:
           EVENT: ${{ github.event_name }}
           SCHEDULE: ${{ github.event.schedule }}
         run: |
           echo "::error::The Facebook page could not be read; the site kept the previous posts. See the 'Copy the latest Facebook posts' step."
-          if [ "$EVENT" != schedule ] || { [ "$SCHEDULE" = '15 5-20/3 * * *' ] && [ "$(date -u +%H)" -lt 8 ]; }; then exit 1; fi
+          if [ "$EVENT" != schedule ] || { [ "$SCHEDULE" = "$FULL" ] && [ "$(date -u +%H)" -lt 8 ]; }; then exit 1; fi
       - if: needs.build.outputs.stripe == 'failure'
         env:
           EVENT: ${{ github.event_name }}
           SCHEDULE: ${{ github.event.schedule }}
         run: |
           echo "::error::Stripe could not be read; the site kept the previous totals. See the 'Add up the Stripe donations' step."
-          if [ "$EVENT" != schedule ] || { [ "$SCHEDULE" = '15 5-20/3 * * *' ] && [ "$(date -u +%H)" -lt 8 ]; }; then exit 1; fi
+          if [ "$EVENT" != schedule ] || { [ "$SCHEDULE" = "$FULL" ] && [ "$(date -u +%H)" -lt 8 ]; }; then exit 1; fi

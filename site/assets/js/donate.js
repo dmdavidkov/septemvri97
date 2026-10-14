@@ -15,10 +15,11 @@ const GENERAL = {
 
 const groupIban = (iban) => iban.replace(/\s+/g, '').replace(/(.{4})/g, '$1 ').trim();
 
-function progress(cause) {
+// The bar fills up when it first comes into view; redrawn with new totals, it shows the amount straight away.
+function progress(cause, animate) {
   const pct = Math.min(100, Math.round((cause.collected / cause.goal) * 100));
-  const bar = el('progress', { max: 100, value: 0, 'aria-label': `Събрани ${pct}%` });
-  onVisible(bar, () => { bar.value = pct; });
+  const bar = el('progress', { max: 100, value: animate ? 0 : pct, 'aria-label': `Събрани ${pct}%` });
+  if (animate) onVisible(bar, () => { bar.value = pct; });
   const deadline = cause.deadline ? dateParts(cause.deadline) : null;
   return el('span', { class: 'cause-progress' }, bar,
     el('span', { class: 'amounts' },
@@ -36,14 +37,14 @@ function noGoal(cause) {
       deadline ? el('span', { text: `срок ${deadline.day} ${deadline.month}` }) : null));
 }
 
-function causeCard(cause, checked, onPick) {
+function causeCard(cause, checked, onPick, animate) {
   const input = el('input', { type: 'radio', name: 'cause', value: cause.code || 'general', checked });
   const card = el('label', { class: 'cause' }, input,
     el('span', { class: 'cause-head' },
       cause.team ? el('span', { class: 'tag', text: cause.team }) : null,
       el('span', { class: 'cause-title', text: cause.title })),
     cause.description ? el('span', { class: 'cause-desc', text: cause.description }) : null,
-    cause.goal ? progress(cause) : noGoal(cause));
+    cause.goal ? progress(cause, animate) : noGoal(cause));
   input.addEventListener('change', () => onPick(cause, card));
   return card;
 }
@@ -118,7 +119,7 @@ function thankYou(cause) {
     el('h2', { class: 'thanks-title', id: 'thanks-title', text: 'Благодарим ви!' }),
     el('p', { class: 'thanks-text', id: 'thanks-text' },
       cause ? ['Подкрепихте ', el('strong', { text: `„${cause.title}“` }), '. '] : null,
-      'Дарението ви ще се добави към събраната сума до около половин час.'),
+      'Дарението ви ще се добави към събраната сума до около 20 минути.'),
     el('div', { class: 'thanks-actions' }, shareButton(cause || GENERAL, 'btn btn-primary'), done),
     close);
   for (const btn of [done, close]) btn.addEventListener('click', () => dialog.close());
@@ -134,23 +135,23 @@ export function initDonate({ config, needs, notice }) {
   const panel = document.getElementById('donate-panel');
   const noticeEl = document.getElementById('donate-notice');
   const coveredBox = document.getElementById('covered');
+  const titleEl = document.getElementById('podkrepi-title');
+  const introEl = document.getElementById('podkrepi-intro');
+  const manyTexts = [titleEl.textContent, introEl.textContent];
 
   const generalPay = checkPayUrl(config.generalPayLink, config.payHosts);
   const general = { ...GENERAL, pay: generalPay.ok ? generalPay : null };
-  const open = needs.filter((n) => !n.covered);
-  const covered = needs.filter((n) => n.covered);
-  const options = open.length ? open : [general];
   // With no causes in the Sheet there is nothing to choose: the panel takes the whole width.
-  const single = options.length === 1;
+  let single = false;
+  let selected = null;
 
   // ?cause=N014 preselects a cause; a covered or unknown code falls back to the first one.
   // Stripe sends donors back with ?dar=N014 (wiki: Stripe): they are thanked and see the cause they gave to.
   const search = new URLSearchParams(location.search);
   const thanked = search.has('dar');
   const wanted = (search.get('cause') || search.get('dar') || '').trim().toUpperCase();
-  let selected = (wanted && open.find((n) => n.code === wanted)) || options[0];
   const notes = [notice];
-  if (wanted && !thanked && covered.some((n) => n.code === wanted)) notes.push('Тази кауза вече е покрита – благодарим! Можете да подкрепите друга.');
+  if (wanted && !thanked && needs.some((n) => n.covered && n.code === wanted)) notes.push('Тази кауза вече е покрита – благодарим! Можете да подкрепите друга.');
   noticeEl.textContent = notes.filter(Boolean).join(' ');
   noticeEl.hidden = !noticeEl.textContent;
 
@@ -258,22 +259,36 @@ export function initDonate({ config, needs, notice }) {
     announce(`Избрано: ${cause.title}`);
   }
 
-  donateEl.classList.toggle('single', single);
-  causesEl.hidden = single;
-  if (single) {
-    document.getElementById('podkrepi-title').textContent = 'Подкрепете отбора';
-    document.getElementById('podkrepi-intro').textContent = 'Даренията отиват директно в клуба, без посредници. Скоро тук ще можете да изберете и конкретна кауза – пътуване до турнир, топки или екипи.';
+  // Draws the causes, and again when new card totals arrive (main.js), keeping the visitor's choice and focus.
+  function show(list, animate) {
+    const open = list.filter((n) => !n.covered);
+    const covered = list.filter((n) => n.covered);
+    const options = open.length ? open : [general];
+    single = options.length === 1;
+    const code = selected ? selected.code : wanted;
+    selected = (code && open.find((n) => n.code === code)) || options[0];
+    const focused = causesEl.contains(document.activeElement) ? document.activeElement.value : null;
+
+    donateEl.classList.toggle('single', single);
+    causesEl.hidden = single;
+    titleEl.textContent = single ? 'Подкрепете отбора' : manyTexts[0];
+    introEl.textContent = single
+      ? 'Даренията отиват директно в клуба, без посредници. Скоро тук ще можете да изберете и конкретна кауза – пътуване до турнир, топки или екипи.'
+      : manyTexts[1];
+    causesEl.replaceChildren(
+      el('legend', { class: 'sr-only', text: 'Изберете кауза' }),
+      ...options.map((c) => causeCard(c, c === selected, pick, animate)));
+    renderPanel(selected);
+    placePanel();
+    if (focused) causesEl.querySelector(`input[value="${CSS.escape(focused)}"]`)?.focus({ preventScroll: true });
+
+    coveredBox.hidden = !covered.length;
+    document.getElementById('covered-list').replaceChildren(...covered.map((n) =>
+      el('li', {}, el('span', { text: n.title }), el('span', { class: 'muted', text: formatEuro(n.goal) }))));
   }
-  causesEl.replaceChildren(
-    el('legend', { class: 'sr-only', text: 'Изберете кауза' }),
-    ...options.map((c) => causeCard(c, c === selected, pick)));
-  renderPanel(selected);
-  placePanel();
+
+  show(needs, true);
   wideScreen.addEventListener('change', placePanel);
-
-  coveredBox.hidden = !covered.length;
-  document.getElementById('covered-list').replaceChildren(...covered.map((n) =>
-    el('li', {}, el('span', { text: n.title }), el('span', { class: 'muted', text: formatEuro(n.goal) }))));
-
   if (wanted || thanked || location.hash === '#podkrepi') document.getElementById('podkrepi').scrollIntoView();
+  return { update: (list) => show(list, false) };
 }
