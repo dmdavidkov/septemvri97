@@ -544,13 +544,34 @@ progress::-moz-progress-bar { background: linear-gradient(90deg, var(--red), var
 .club-story .lead { font-size: 1.15rem; line-height: 1.6; }
 .club-story h2 { margin: 0 0 .55em; text-wrap: wrap; font: 800 clamp(1.85rem, 1.15rem + 2.4vw, 2.6rem)/1.05 var(--font-display); font-size: clamp(1.75rem, 5.8cqi, 3.1rem); letter-spacing: -.035em; }
 /* Honours: one row per success, year in the display face, team tags on the right, thin rules between. */
-.honours { max-width: 36em; margin: 30px 0 0; padding: 0; list-style: none; border-top: 1px solid var(--line); }
+.honours-label { margin: 30px 0 10px; color: var(--muted); font: 700 .75rem/1 var(--font-body); letter-spacing: .14em; text-transform: uppercase; }
+.honours { max-width: 36em; margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--line); }
 .honours li { display: grid; grid-template-columns: 4.1rem minmax(0, 1fr) auto; align-items: baseline; column-gap: 16px; padding: 15px 0; border-bottom: 1px solid var(--line); }
 .honours-year { color: var(--red); font: 800 1rem/1.3 var(--font-display); letter-spacing: -.02em; }
 .honours-title { font-weight: 700; font-size: 1.04rem; line-height: 1.35; }
 .honours-title small { display: block; margin-top: 2px; color: var(--muted); font-size: .88rem; font-weight: 400; }
 .honours-teams { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
 .honours .tag { background: rgba(218, 22, 45, .1); color: var(--red-dark); }
+/* All national championship medals: one row per age group, the titles in the display face. */
+.honours-table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.honours-table th, .honours-table td { padding: 15px 18px 15px 0; border-bottom: 1px solid var(--line); text-align: left; vertical-align: baseline; }
+.honours-table thead th { padding-top: 0; padding-bottom: 12px; border-bottom: 2px solid var(--ink); color: var(--muted); font: 700 .75rem/1.2 var(--font-body); letter-spacing: .12em; text-transform: uppercase; }
+.honours-table tbody th { width: 5.5rem; color: var(--red); font: 800 1rem/1.3 var(--font-display); }
+.honours-table td { width: 30%; font-weight: 600; }
+.honours-table td.gold { font: 800 1rem/1.3 var(--font-display); letter-spacing: -.01em; word-spacing: .3em; }
+.honours-table td.none { color: var(--muted); font-weight: 400; }
+.honours-note { max-width: 46em; margin: 16px 0 0; color: var(--muted); font-size: .92rem; }
+/* Phones: each age group becomes a block of "place: years" lines; empty places are left out. */
+@media (max-width: 639px) {
+  .honours-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .honours-table tbody { border-top: 2px solid var(--ink); }
+  .honours-table tr { display: grid; grid-template-columns: 3.6rem minmax(0, 1fr); align-items: baseline; row-gap: 4px; padding: 14px 0; border-bottom: 1px solid var(--line); }
+  .honours-table th, .honours-table td { width: auto; padding: 0; border: 0; }
+  .honours-table tbody th { grid-row: span 3; }
+  .honours-table td { grid-column: 2; display: grid; grid-template-columns: 6.6rem minmax(0, 1fr); column-gap: 8px; }
+  .honours-table td::before { content: attr(data-label); color: var(--muted); font: 400 .85rem/1.5 var(--font-body); letter-spacing: 0; }
+  .honours-table td.none { display: none; }
+}
 @media (max-width: 479px) { .honours li { grid-template-columns: 3.4rem minmax(0, 1fr) auto; column-gap: 10px; } .honours-title { font-size: 1rem; } }
 /* The emblem on a game-night card, over a big outlined "97" (crisp at any size, unlike the raster wordmark). */
 .club-badge {
