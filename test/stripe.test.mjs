@@ -90,6 +90,7 @@ test('run: totals for the causes\' links only; live totals kept on errors', asyn
   assert.deepEqual(result, { changed: true, links: 2, error: null });
   const first = await read();
   assert.deepEqual(first, { eurCents: { [LINK_A]: 5000, [LINK_B]: 1500 } });
+  assert.equal(await fs.readFile(path.join(root, 'site/data/stripe.csv'), 'utf8'), `link,cents\n"${LINK_A}",5000\n"${LINK_B}",1500\n`);
   const api = calls.filter((c) => c.url.startsWith('https://api.stripe.com/'));
   assert.equal(api.length, 3);
   assert.ok(api.every((c) => c.options.headers.authorization === 'Bearer rk_test_made_up'));

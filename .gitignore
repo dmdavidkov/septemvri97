@@ -11,6 +11,7 @@ site/assets/fb/
 
 # Stripe totals per payment link, added up at publish time (scraper/stripe.mjs).
 site/data/stripe.json
+site/data/stripe.csv
 
 # Link previews of shared matches, made at publish time (scripts/share-cards.mjs).
 site/m/

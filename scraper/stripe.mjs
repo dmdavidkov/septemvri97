@@ -1,6 +1,7 @@
 // Adds up the card donations that came through each cause's Stripe payment link and writes
-// site/data/stripe.json ({ eurCents: { "<link>": cents } }) when the site is published. The site adds these to
-// the Sheet's "Събрано €", which then holds only what came another way (bank transfers, cash).
+// site/data/stripe.json ({ eurCents: { "<link>": cents } }) and stripe.csv (the same, for the Sheet) when the site is
+// published. The site adds these to the Sheet's "Събрано €", which then holds only what came another way (bank
+// transfers, cash).
 // It reads with a restricted, read-only key (secret STRIPE_KEY) and publishes one total per link, only for the
 // links in the Sheet's "Нужди" tab: links that aren't on the site (a partner's own link, say) stay private.
 // No donor data leaves Stripe, and the file is never committed.
@@ -83,6 +84,10 @@ export async function run({ root, key, fetchImpl = fetch, live = LIVE, needsUrl 
   async function write(eurCents) {
     await fs.mkdir(path.dirname(outFile), { recursive: true });
     await fs.writeFile(outFile, `${JSON.stringify({ eurCents }, null, 2)}\n`);
+    // The same totals for the Sheet's "С карта €" column, which reads them with IMPORTDATA (README). Whole cents,
+    // because a Bulgarian-locale Sheet reads "180.5" as text.
+    const csv = Object.entries(eurCents).map(([link, cents]) => `"${link.replaceAll('"', '""')}",${cents}`);
+    await fs.writeFile(path.join(path.dirname(outFile), 'stripe.csv'), `${['link,cents', ...csv].join('\n')}\n`);
     return { changed: JSON.stringify(current?.eurCents ?? null) !== JSON.stringify(eurCents), links: Object.keys(eurCents).length };
   }
 
