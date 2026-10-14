@@ -45,7 +45,7 @@ export async function run({ root, key, fetchImpl = fetch, live = LIVE, needsUrl 
     log('No STRIPE_KEY: the site shows only the amounts from the Sheet.');
     return { changed: false, links: 0, error: null };
   }
-  if (key.startsWith('sk_')) log('STRIPE_KEY is a full secret key; a restricted key with read access is enough (README).');
+  if (key.startsWith('sk_')) log('STRIPE_KEY is a full secret key; a restricted key with read access is enough (wiki: Stripe).');
 
   async function get(url, what, headers = {}) {
     const res = await fetchImpl(url, { headers, signal: AbortSignal.timeout(20_000) });
@@ -84,7 +84,7 @@ export async function run({ root, key, fetchImpl = fetch, live = LIVE, needsUrl 
   async function write(eurCents) {
     await fs.mkdir(path.dirname(outFile), { recursive: true });
     await fs.writeFile(outFile, `${JSON.stringify({ eurCents }, null, 2)}\n`);
-    // The same totals for the Sheet's "С карта €" column, which reads them with IMPORTDATA (README). Whole cents,
+    // The same totals for the Sheet's "С карта €" column, which reads them with IMPORTDATA (wiki: Google таблицата). Whole cents,
     // because a Bulgarian-locale Sheet reads "180.5" as text.
     const csv = Object.entries(eurCents).map(([link, cents]) => `"${link.replaceAll('"', '""')}",${cents}`);
     await fs.writeFile(path.join(path.dirname(outFile), 'stripe.csv'), `${['link,cents', ...csv].join('\n')}\n`);

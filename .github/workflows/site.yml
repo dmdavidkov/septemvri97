@@ -78,7 +78,7 @@ jobs:
         id: posts
         continue-on-error: true
         env:
-          # Repository variable: links of posts the site must not show (README).
+          # Repository variable: links of posts the site must not show (wiki: Новини от Facebook).
           FB_HIDE: ${{ vars.FB_HIDE }}
           # Temporary secret for filling the site after a gap (CLAUDE.md). Delete it after one run.
           FB_SEED: ${{ secrets.FB_SEED }}
@@ -89,7 +89,7 @@ jobs:
         id: stripe
         continue-on-error: true
         env:
-          # Restricted key with read access (README). Without it the step does nothing.
+          # Restricted key with read access (wiki: Stripe). Without it the step does nothing.
           STRIPE_KEY: ${{ secrets.STRIPE_KEY }}
         run: npm run stripe
 

@@ -144,7 +144,7 @@ export function initDonate({ config, needs, notice }) {
   const single = options.length === 1;
 
   // ?cause=N014 preselects a cause; a covered or unknown code falls back to the first one.
-  // Stripe sends donors back with ?dar=N014 (README): they are thanked and see the cause they gave to.
+  // Stripe sends donors back with ?dar=N014 (wiki: Stripe): they are thanked and see the cause they gave to.
   const search = new URLSearchParams(location.search);
   const thanked = search.has('dar');
   const wanted = (search.get('cause') || search.get('dar') || '').trim().toUpperCase();
