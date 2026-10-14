@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-14T05:27:05.074Z",
+  "updated": "2026-10-14T08:35:04.668Z",
   "season": "2026/2027",
   "teams": [
     {
@@ -137,31 +137,6 @@
       "url": "https://comps.basketball.bg/game-385224"
     },
     {
-      "id": "bfb-384690",
-      "source": "bfb",
-      "team": "women",
-      "competition": "А група Жени",
-      "phase": "Редовен сезон",
-      "round": 2,
-      "date": "2026-10-17",
-      "time": "16:00",
-      "start": "2026-10-17T16:00:00+03:00",
-      "venue": "Триадица - София",
-      "home": {
-        "name": "Септември 97",
-        "logo": "assets/logos/bfb/clubs-20250725084541.jpg",
-        "isUs": true
-      },
-      "away": {
-        "name": "Рилски спортист",
-        "logo": "assets/logos/bfb/clubs-20250527185844.png",
-        "isUs": false
-      },
-      "score": null,
-      "liveUrl": null,
-      "url": "https://comps.basketball.bg/game-384690"
-    },
-    {
       "id": "bfb-385069",
       "source": "bfb",
       "team": "u14",
@@ -185,6 +160,31 @@
       "score": null,
       "liveUrl": null,
       "url": "https://comps.basketball.bg/game-385069"
+    },
+    {
+      "id": "bfb-384690",
+      "source": "bfb",
+      "team": "women",
+      "competition": "А група Жени",
+      "phase": "Редовен сезон",
+      "round": 2,
+      "date": "2026-10-20",
+      "time": "16:00",
+      "start": "2026-10-20T16:00:00+03:00",
+      "venue": "Триадица - София",
+      "home": {
+        "name": "Септември 97",
+        "logo": "assets/logos/bfb/clubs-20250725084541.jpg",
+        "isUs": true
+      },
+      "away": {
+        "name": "Рилски спортист",
+        "logo": "assets/logos/bfb/clubs-20250527185844.png",
+        "isUs": false
+      },
+      "score": null,
+      "liveUrl": null,
+      "url": "https://comps.basketball.bg/game-384690"
     },
     {
       "id": "bfb-385124",
