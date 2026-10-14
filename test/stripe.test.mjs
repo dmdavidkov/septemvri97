@@ -103,16 +103,25 @@ test('run: totals for the causes\' links only; live totals kept on errors', asyn
   ({ fetchImpl } = fakeFetch({ 'https://live.test/data/stripe.json': first, [NEEDS]: needsCsv, ...stripe }));
   assert.equal((await run({ ...opts, fetchImpl })).changed, false);
 
-  // A key without a permission: Stripe's reason is logged and the live totals stay.
+  // A key without a permission: Stripe's reason is logged without the key's ends, and the live totals stay.
   await reset();
-  const denied = new Response(JSON.stringify({ error: { message: 'The provided key does not have the required permissions.' } }), { status: 403 });
+  const denied = new Response(JSON.stringify({ error: { message: "The provided key 'rk_test_*****e_up' does not have the required permissions." } }), { status: 403 });
   ({ fetchImpl } = fakeFetch({ 'https://live.test/data/stripe.json': first, [NEEDS]: needsCsv, 'https://api.stripe.com/': denied }));
   result = await run({ ...opts, fetchImpl });
-  assert.match(result.error, /HTTP 403 \(The provided key does not have the required permissions\.\)/);
+  assert.match(result.error, /HTTP 403 \(The provided key … does not have the required permissions\.\)/);
   assert.equal(result.changed, false);
   assert.deepEqual(await read(), first);
   assert.ok(logs.some((m) => /keeping the totals/.test(m)));
-  assert.ok(logs.every((m) => !m.includes('rk_test_made_up')));
+  assert.ok(logs.every((m) => !m.includes('rk_test_') && !m.includes('*')));
+
+  // Something else in the secret: Stripe isn't asked, the value isn't logged, the live totals stay.
+  await reset();
+  ({ fetchImpl, calls } = fakeFetch({ 'https://live.test/data/stripe.json': first, [NEEDS]: needsCsv, ...stripe }));
+  result = await run({ ...opts, key: 'google-site-verification=made-up', fetchImpl });
+  assert.match(result.error, /not a Stripe key/);
+  assert.equal(calls.filter((c) => c.url.startsWith('https://api.stripe.com/')).length, 0);
+  assert.deepEqual(await read(), first);
+  assert.ok(logs.every((m) => !m.includes('made-up')));
 
   // The Sheet can't be read either: same, nothing is guessed.
   await reset();

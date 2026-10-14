@@ -49,8 +49,9 @@ export async function run({ root, key, fetchImpl = fetch, live = LIVE, needsUrl 
   async function get(url, what, headers = {}) {
     const res = await fetchImpl(url, { headers, signal: AbortSignal.timeout(20_000) });
     if (!res.ok) {
-      // Stripe says what is wrong, e.g. a permission the restricted key lacks. It never repeats the key in full.
-      const reason = (await res.json().catch(() => null))?.error?.message;
+      // Stripe says what is wrong, e.g. a permission the restricted key lacks. Its message shows the key's ends
+      // ("rk_live_****abcd"); the Actions log is public, so that part goes.
+      const reason = (await res.json().catch(() => null))?.error?.message?.replace(/\S*\*{3,}\S*/g, '…');
       throw new Error(`${what}: HTTP ${res.status}${reason ? ` (${reason})` : ''}`);
     }
     return res;
@@ -86,6 +87,8 @@ export async function run({ root, key, fetchImpl = fetch, live = LIVE, needsUrl 
   }
 
   try {
+    // Something else pasted into the secret isn't sent to Stripe.
+    if (!/^[rs]k_(test|live)_\w+$/.test(key)) throw new Error('STRIPE_KEY is not a Stripe key (it starts with rk_test_ or rk_live_)');
     const shown = new Set();
     if (needsUrl) {
       const needs = parseNeeds(await (await get(needsUrl, 'Sheet "Нужди"')).text(), { allowedHosts: config.payHosts });
@@ -108,7 +111,7 @@ export async function run({ root, key, fetchImpl = fetch, live = LIVE, needsUrl 
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-  const result = await run({ root, key: process.env.STRIPE_KEY });
+  const result = await run({ root, key: process.env.STRIPE_KEY?.trim() });
   console.log(`${result.links} links with donations${result.changed ? ', changed' : ''}`);
   if (process.env.GITHUB_OUTPUT) await fs.appendFile(process.env.GITHUB_OUTPUT, `changed=${result.changed}\n`);
   if (result.error) process.exitCode = 1;
