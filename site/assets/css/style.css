@@ -543,16 +543,15 @@ progress::-moz-progress-bar { background: linear-gradient(90deg, var(--red), var
 .club-story p:not(.eyebrow) { max-width: 34em; font-size: 1.07rem; }
 .club-story .lead { font-size: 1.15rem; line-height: 1.6; }
 .club-story h2 { margin: 0 0 .55em; text-wrap: wrap; font: 800 clamp(1.85rem, 1.15rem + 2.4vw, 2.6rem)/1.05 var(--font-display); font-size: clamp(1.75rem, 5.8cqi, 3.1rem); letter-spacing: -.035em; }
-/* Medals as small cards with a gold, silver or bronze disc */
-.medals { display: grid; gap: 12px; margin: 28px 0 0; padding: 0; list-style: none; }
-@media (min-width: 520px) { .medals { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-.medal { display: flex; align-items: center; gap: 12px; padding: 13px 14px; border-radius: 16px; background: var(--white); box-shadow: var(--shadow); }
-.medal-disc { flex: none; display: grid; place-items: center; width: 46px; height: 46px; border-radius: 50%; color: var(--ink); font: 800 .78rem/1 var(--font-display); box-shadow: inset 0 0 0 3px rgba(255, 255, 255, .4), 0 4px 12px rgba(11, 10, 12, .16); }
-.gold .medal-disc { background: radial-gradient(circle at 32% 28%, #FFF6CC, #E7B845 48%, #A97817); }
-.silver .medal-disc { background: radial-gradient(circle at 32% 28%, #FFFFFF, #CBD0D7 48%, #8A919B); }
-.bronze .medal-disc { background: radial-gradient(circle at 32% 28%, #FFE0C4, #D18C52 48%, #8E5324); }
-.medal b { display: block; font-size: .95rem; font-weight: 700; line-height: 1.3; }
-.medal small { color: var(--muted); font-size: .85rem; }
+/* Honours: one row per success, year in the display face, team tags on the right, thin rules between. */
+.honours { max-width: 36em; margin: 30px 0 0; padding: 0; list-style: none; border-top: 1px solid var(--line); }
+.honours li { display: grid; grid-template-columns: 4.1rem minmax(0, 1fr) auto; align-items: baseline; column-gap: 16px; padding: 15px 0; border-bottom: 1px solid var(--line); }
+.honours-year { color: var(--red); font: 800 1rem/1.3 var(--font-display); letter-spacing: -.02em; }
+.honours-title { font-weight: 700; font-size: 1.04rem; line-height: 1.35; }
+.honours-title small { display: block; margin-top: 2px; color: var(--muted); font-size: .88rem; font-weight: 400; }
+.honours-teams { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
+.honours .tag { background: rgba(218, 22, 45, .1); color: var(--red-dark); }
+@media (max-width: 479px) { .honours li { grid-template-columns: 3.4rem minmax(0, 1fr) auto; column-gap: 10px; } .honours-title { font-size: 1rem; } }
 /* The emblem on a game-night card, over a big outlined "97" (crisp at any size, unlike the raster wordmark). */
 .club-badge {
   position: relative; isolation: isolate; overflow: hidden;
