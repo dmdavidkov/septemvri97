@@ -1,5 +1,6 @@
 // Fetches the club's BFB schedules and writes site/data/games.json.
-// Gentle on BFB: one request per team, game pages only when needed, 1 s between requests.
+// Gentle on BFB: one request per team, game pages only when needed (new or moved games, missing details, and the
+// coming week's games on full runs, for hall changes), 1 s between requests.
 // A team that fails keeps its previous games; the run then exits with code 1 so GitHub emails.
 // With --soon it checks only the teams playing around now, for live links and final scores (see teamsPlayingNow).
 import fs from 'node:fs/promises';
@@ -128,11 +129,14 @@ export async function run({ root, fetchImpl = fetch, delayMs = 1000, now = new D
       const daysAway = (Date.parse(start) - now.getTime()) / 86_400_000;
       // Re-read the game page when details were never captured, or the venue is still missing close to the game.
       const retryVenue = sameSlot && !old.venue && (!old.round || (daysAway > -1 && daysAway < VENUE_RETRY_DAYS));
+      // BFB can move a game to another hall without changing its date or time, and the schedule doesn't show halls,
+      // so the full runs also re-read the pages of the coming week's games.
+      const recheck = sameSlot && !only && daysAway > 0 && daysAway < VENUE_RETRY_DAYS;
 
       let details = sameSlot
         ? { round: old.round, venue: old.venue, homeIsUs: old.home.isUs, awayIsUs: old.away.isUs }
         : null;
-      if ((!details || retryVenue) && pageFetches < MAX_PAGE_FETCHES) {
+      if ((!details || retryVenue || recheck) && pageFetches < MAX_PAGE_FETCHES) {
         pageFetches++;
         try {
           const p = parseGamePage(await get(`game-${g.id}`), [g.competition, g.phase]);

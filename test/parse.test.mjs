@@ -126,12 +126,25 @@ test('scraper run: writes once, is stable, keeps a failing team', async () => {
   assert.ok(data.games.filter((g) => g.team === 'u19').every((g) => g.home.isUs || g.away.isUs));
   assert.deepEqual(data.games.map((g) => g.start), [...data.games.map((g) => g.start)].sort((a, b) => Date.parse(a) - Date.parse(b)));
 
-  // Second run: nothing changed, no game pages for known games, logos not re-downloaded.
+  // Second run: nothing changed, logos not re-downloaded, and of the known games only the coming week's page is re-read.
   const second = await fakeBfb();
   const r2 = await run({ ...opts, fetchImpl: second.fetchImpl });
   assert.equal(r2.changed, false);
   assert.ok(!second.calls.some((c) => c.startsWith('pictures/')));
-  assert.ok(!second.calls.includes('game-384690'));
+  assert.ok(second.calls.includes('game-384690'));
+  assert.ok(!second.calls.includes('game-384686'));
+
+  // BFB moved the game to another hall at the same time: quick runs don't re-read it, the next full run does.
+  const hall = { 'game-384690': (await fixture('game_384690_upcoming.html')).replace('Триадица - София', 'Христо Ботев - София') };
+  const quick = await fakeBfb(new Set(), hall);
+  await run({ ...opts, fetchImpl: quick.fetchImpl, only: ['women'] });
+  assert.ok(!quick.calls.includes('game-384690'));
+  const moved = await fakeBfb(new Set(), hall);
+  assert.equal((await run({ ...opts, fetchImpl: moved.fetchImpl })).changed, true);
+  const venue = async () => JSON.parse(await fs.readFile(path.join(dir, 'site/data/games.json'), 'utf8')).games.find((g) => g.id === 'bfb-384690').venue;
+  assert.equal(await venue(), 'Христо Ботев - София');
+  await run({ ...opts, fetchImpl: second.fetchImpl });
+  assert.equal(await venue(), 'Триадица - София');
 
   // A failing team keeps its previous games and reports an error.
   const third = await fakeBfb(new Set(['t_id=3672']));
