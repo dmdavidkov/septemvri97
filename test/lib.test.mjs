@@ -3,9 +3,9 @@ import assert from 'node:assert/strict';
 import { parseCsv } from '../site/assets/js/lib/csv.js';
 import {
   parseNumber, parseDate, parseTime, parseBool, parseScore, sofiaISO,
-  checkPayUrl, checkLinkUrl, providerName, formatEuro, dateParts,
+  checkPayUrl, checkLinkUrl, providerName, formatEuro, dateParts, payLinkKey,
 } from '../site/assets/js/lib/values.js';
-import { parseNeeds, parseGames, parsePackages } from '../site/assets/js/lib/sheet.js';
+import { parseNeeds, parseGames, parsePackages, addOnline } from '../site/assets/js/lib/sheet.js';
 
 const HOSTS = ['buy.stripe.com', 'www.paypal.com', 'paypal.me'];
 const TEAMS = [
@@ -124,6 +124,23 @@ test('needs: valid rows, hidden rows, bad rows reported', () => {
   const skipped = errors.filter((e) => e.skipped).map((e) => e.row);
   assert.deepEqual(skipped, [5, 6]);
   assert.equal(errors.filter((e) => !e.skipped && e.row === 8).length, 3);
+});
+
+test('needs: Stripe donations join the Sheet\'s amount and can cover a cause', () => {
+  assert.equal(payLinkKey('https://buy.stripe.com/test_1?locale=bg'), 'https://buy.stripe.com/test_1');
+  assert.equal(payLinkKey('https://buy.stripe.com/test_1/'), 'https://buy.stripe.com/test_1');
+  assert.equal(payLinkKey('not a link'), '');
+
+  const { rows } = parseNeeds(NEEDS_CSV, { allowedHosts: HOSTS });
+  assert.equal(addOnline(rows, null), rows);
+  // N014: 420 € from the Sheet + 180,50 € by card reaches the 600 € goal.
+  const withCards = addOnline(rows, { 'https://buy.stripe.com/test_1': 18050, 'https://buy.stripe.com/other': 999 });
+  assert.equal(withCards[0].online, 180.5);
+  assert.equal(withCards[0].collected, 600.5);
+  assert.equal(withCards[0].covered, true);
+  assert.deepEqual(withCards.slice(1), rows.slice(1));
+  // Bad values from the file change nothing.
+  for (const bad of [-500, 12.5, '5000', null]) assert.equal(addOnline(rows, { 'https://buy.stripe.com/test_1': bad })[0].collected, 420);
 });
 
 test('needs: Cyrillic look-alikes become Latin; clear reasons for bad codes', () => {

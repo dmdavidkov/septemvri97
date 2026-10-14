@@ -10,6 +10,7 @@
     "test": "node --test",
     "scrape": "node scraper/scrape.mjs",
     "posts": "node scraper/facebook.mjs",
+    "stripe": "node scraper/stripe.mjs",
     "cards": "node scripts/share-cards.mjs",
     "serve": "node scripts/serve.mjs"
   },

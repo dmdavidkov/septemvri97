@@ -2,7 +2,8 @@
 // URL switches: ?demo uses the sample CSVs and posts, ?check lists rows the site skipped (for the club's admins).
 import config from './config.js';
 import { el, onVisible, reducedMotion } from './lib/dom.js';
-import { parseNeeds, parseGames, parsePackages } from './lib/sheet.js';
+import { parseNeeds, parseGames, parsePackages, addOnline } from './lib/sheet.js';
+import { formatEuro } from './lib/values.js';
 import { createGames } from './games.js';
 import { initDonate } from './donate.js';
 import { initPartners } from './partners.js';
@@ -37,7 +38,7 @@ async function loadTab(source, parse) {
 
 const stamp = new Intl.DateTimeFormat('bg-BG', { timeZone: 'Europe/Sofia', dateStyle: 'long', timeStyle: 'short' });
 
-function renderCheck(tabs, games) {
+function renderCheck(tabs, games, needs) {
   const tab = ({ title, result }) => [
     el('h3', { text: title }),
     el('p', { text: result.source ? `Източник: ${result.source.label}. Показани редове: ${result.rows.length}.` : 'Не е свързана (празен адрес в config.js).' }),
@@ -47,10 +48,16 @@ function renderCheck(tabs, games) {
       : result.source && !result.fatal ? el('p', { text: 'Няма проблеми.' }) : null,
   ];
   const s = games.summary();
+  const online = needs.rows.filter((n) => n.online);
   const box = el('section', { class: 'check', 'aria-label': 'Проверка на данните' },
     el('div', { class: 'wrap' },
       el('h2', { text: 'Проверка на данните' }),
       el('p', { text: s.updated ? `Програма от БФБ: ${s.bfb} мача (последна промяна: ${stamp.format(new Date(s.updated))}).` : 'Програмата от БФБ (data/games.json) не се зареди.' }),
+      el('p', { text: !needs.stripe
+        ? 'Плащания през Stripe: няма данни (data/stripe.json). „Събрано €“ е само от таблицата.'
+        : online.length
+          ? `Плащания през Stripe, добавени към „Събрано €“: ${online.map((n) => `${n.code} ${formatEuro(n.online)}`).join(', ')}.`
+          : 'Плащания през Stripe: още няма плащания по линковете на каузите.' }),
       tabs.map(tab)));
   document.getElementById('main').prepend(box);
 }
@@ -96,10 +103,18 @@ const gamesSource = tabSource('games', 'data/sample-games.csv');
 const needsSource = tabSource('needs', 'data/sample-needs.csv');
 const packagesSource = tabSource('packages', 'data/sample-packages.csv');
 
-const needsDone = loadTab(needsSource, (text) => parseNeeds(text, { allowedHosts: config.payHosts })).then((result) => {
-  initDonate({ config, needs: result.rows, notice: demo ? 'Показани са примерни каузи (?demo).' : '' });
-  return result;
-});
+// Card donations per Stripe link, added up when the site is published (scraper/stripe.mjs). no-cache as for
+// games.json below.
+const stripeDone = demo ? Promise.resolve(null) : fetch('data/stripe.json', { cache: 'no-cache' })
+  .then((res) => (res.ok ? res.json() : null))
+  .catch(() => null);
+
+const needsDone = Promise.all([loadTab(needsSource, (text) => parseNeeds(text, { allowedHosts: config.payHosts })), stripeDone])
+  .then(([result, stripe]) => {
+    const needs = { ...result, rows: addOnline(result.rows, stripe?.eurCents), stripe };
+    initDonate({ config, needs: needs.rows, notice: demo ? 'Показани са примерни каузи (?demo).' : '' });
+    return needs;
+  });
 
 const packagesDone = loadTab(packagesSource, (text) => parsePackages(text, { allowedHosts: config.payHosts })).then((result) => {
   initPartners({ config, packages: result.rows });
@@ -130,5 +145,5 @@ if (check) {
     { title: 'Таблица „Нужди“', result: needs },
     { title: 'Таблица „Мачове“', result: sheetGames },
     { title: 'Таблица „Пакети“', result: packages },
-  ], games));
+  ], games, needs));
 }

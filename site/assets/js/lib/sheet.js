@@ -3,7 +3,7 @@
 import { parseCsv } from './csv.js';
 import {
   clean, normalizeKey, parseNumber, parseDate, parseTime, parseBool, parseScore,
-  sofiaISO, checkPayUrl, checkLinkUrl, formatEuro,
+  sofiaISO, checkPayUrl, checkLinkUrl, formatEuro, payLinkKey,
 } from './values.js';
 
 const MAX_NEEDS = 30;
@@ -157,6 +157,20 @@ export function parseNeeds(text, { allowedHosts }) {
     });
   }
   return { rows, errors };
+}
+
+// Card donations through a cause's Stripe link (data/stripe.json, euro cents per link, made when the site is
+// published) join what the Sheet says was collected another way: bank transfers, cash.
+export function addOnline(rows, eurCents) {
+  if (!eurCents || typeof eurCents !== 'object') return rows;
+  return rows.map((row) => {
+    const key = row.pay ? payLinkKey(row.pay.url) : '';
+    const cents = key && Object.hasOwn(eurCents, key) ? eurCents[key] : 0;
+    if (!Number.isSafeInteger(cents) || cents <= 0) return row;
+    const online = cents / 100;
+    const collected = Math.round((row.collected + online) * 100) / 100;
+    return { ...row, online, collected, covered: row.goal !== null && collected >= row.goal };
+  });
 }
 
 // Matches the Sheet's "Отбор" text to a team: exact key/label/short, else a short code inside the text.

@@ -2,7 +2,7 @@
 
 Static site for БК Септември 97, a women's basketball club in Sofia. It's hosted on GitHub Pages from `site/`, and the repository is public.
 
-- **No build step and no framework.** The site is plain HTML, CSS and ES modules. Node is only for tests (`npm test`), the BFB scraper, the local server and the match link previews. Dependencies: cheerio only, used by the scraper.
+- **No build step and no framework.** The site is plain HTML, CSS and ES modules. Node is only for tests (`npm test`), the BFB scraper, the Facebook and Stripe steps, the local server and the match link previews. Dependencies: cheerio only, used by the scraper.
 - **Match link previews** (`site/m/<game>.html` and `.jpg`) are made when the site is published (`npm run cards`, with the runner's Chrome) and never committed. They exist only for BFB games, and the picture comes from `drawCard` in `share.js`. The `?v=` in their links changes with the game (`shareVersion`), because Facebook keeps a preview for weeks.
 - **Relative URLs** for every asset and data file, because the site also runs under `dmdavidkov.github.io/septemvri97/`. Only canonical, OG, JSON-LD and sitemap URLs are absolute (`https://www.septemvri97.eu/`).
 - **Sheet content is untrusted.** Render it with `textContent` and the `el()` helper in `site/assets/js/lib/dom.js`, never with `innerHTML`. Payment links must pass `checkPayUrl` (exact allow-listed https hosts), and game links must pass `checkLinkUrl`.
@@ -20,6 +20,7 @@ Static site for БК Септември 97, a women's basketball club in Sofia. 
 - **BFB scraping is gentle:** one request per team, game pages only when needed, 1 s between requests. A failing team keeps its previous games. The 30-minute runs (`--soon`) ask only for teams playing around then.
 - BFB TV links come only from BFB's own list (`liveUrl`). Don't build them from game IDs: a game without a broadcast has an empty BFB TV page.
 - **Facebook reading is gentle too:** one page request per run (every 30 minutes), and photos only for posts the site doesn't have yet. If it fails, the live posts stay. Never commit real Facebook pages or posts: the tests use made-up ones.
+- **Stripe totals** (`scraper/stripe.mjs`) use a restricted, read-only key (secret `STRIPE_KEY`). Only one euro total per payment link, and only for links in the „Нужди“ tab, goes into `site/data/stripe.json`, which is published, never committed. No donor names or emails leave Stripe. The Sheet's „Събрано €“ holds only money from outside Stripe, and the site adds the two. If Stripe fails, the live totals stay. Stripe sends donors back with `?dar=<code>`, which shows a thank-you.
 - Update the tests in `test/` along with any parser change. Saved BFB pages live in `scraper/fixtures/`, trimmed so they contain no player data.
 - Times are Europe/Sofia. `start` is ISO with the Sofia offset (`sofiaISO`), and the UI shows the stored `date` and `time` as they are.
 

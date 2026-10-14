@@ -85,12 +85,29 @@ export function initDonate({ config, needs, notice }) {
   const single = options.length === 1;
 
   // ?cause=N014 preselects a cause; a covered or unknown code falls back to the first one.
-  const wanted = (new URLSearchParams(location.search).get('cause') || '').trim().toUpperCase();
+  // Stripe sends donors back with ?dar=N014 (README): they are thanked and see the cause they gave to.
+  const search = new URLSearchParams(location.search);
+  const thanked = search.has('dar');
+  const wanted = (search.get('cause') || search.get('dar') || '').trim().toUpperCase();
   let selected = (wanted && open.find((n) => n.code === wanted)) || options[0];
   const notes = [notice];
-  if (wanted && covered.some((n) => n.code === wanted)) notes.push('Тази кауза вече е покрита – благодарим! Можете да подкрепите друга.');
+  if (wanted && !thanked && covered.some((n) => n.code === wanted)) notes.push('Тази кауза вече е покрита – благодарим! Можете да подкрепите друга.');
   noticeEl.textContent = notes.filter(Boolean).join(' ');
   noticeEl.hidden = !noticeEl.textContent;
+
+  if (thanked) {
+    const cause = wanted && needs.find((n) => n.code === wanted);
+    const title = 'Благодарим за дарението!';
+    const text = `${cause ? `Подкрепихте „${cause.title}“. ` : ''}Дарението ви ще се добави към събраната сума до около половин час.`;
+    const box = document.getElementById('donate-thanks');
+    box.replaceChildren(el('strong', { text: title }), el('p', { text }));
+    box.hidden = false;
+    announce(`${title} ${text}`);
+    // A reload or a shared link shouldn't thank again.
+    const url = new URL(location.href);
+    url.searchParams.delete('dar');
+    history.replaceState(history.state, '', url);
+  }
 
   // Neither a payment link nor the IBAN is published yet: one block that asks donors to write.
   function writeUsBlock(cause, reference) {
@@ -229,5 +246,5 @@ export function initDonate({ config, needs, notice }) {
   document.getElementById('covered-list').replaceChildren(...covered.map((n) =>
     el('li', {}, el('span', { text: n.title }), el('span', { class: 'muted', text: formatEuro(n.goal) }))));
 
-  if (wanted || location.hash === '#podkrepi') document.getElementById('podkrepi').scrollIntoView();
+  if (wanted || thanked || location.hash === '#podkrepi') document.getElementById('podkrepi').scrollIntoView();
 }

@@ -118,6 +118,16 @@ export function checkPayUrl(raw, allowedHosts) {
   return { ok: true, url: u.href, host, placeholder: /placeholder/i.test(u.href) };
 }
 
+// A payment link without its query (?locale=bg …), so the Sheet's link matches Stripe's: "https://buy.stripe.com/abc".
+export function payLinkKey(url) {
+  try {
+    const u = new URL(url);
+    return `${u.origin}${u.pathname.replace(/\/+$/, '')}`;
+  } catch {
+    return '';
+  }
+}
+
 // Links next to games (streams, WABA pages): https and a host under one of the allowed domains.
 export function checkLinkUrl(raw, allowedDomains) {
   const text = clean(raw);
