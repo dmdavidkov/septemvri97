@@ -45,7 +45,7 @@ function causeCard(cause, checked, onPick, animate) {
       el('span', { class: 'cause-title', text: cause.title })),
     cause.description ? el('span', { class: 'cause-desc', text: cause.description }) : null,
     cause.goal ? progress(cause, animate) : noGoal(cause));
-  input.addEventListener('change', () => onPick(cause, card));
+  input.addEventListener('change', () => onPick(cause));
   return card;
 }
 
@@ -244,41 +244,17 @@ export function initDonate({ config, needs, notice }) {
     panel.replaceChildren(head, body);
   }
 
+  // The panel always follows the whole list: beside it on wide screens, under it on phones, where the cards are short.
   // Sharing comes last, except in the wide single-cause panel, where it fills the left column under the title.
   const wideScreen = matchMedia('(min-width: 960px)');
-  const calm = matchMedia('(prefers-reduced-motion: reduce)');
   function placePanel() {
     (single && wideScreen.matches ? head : body).append(share);
   }
 
-  // Phones and tablets swipe through the causes in one row, and the panel stays put under it.
-  // Wide screens list the causes next to the panel.
-  let rail;
-  let dots;
-  function reveal(card, smooth) {
-    if (wideScreen.matches) return;
-    const pad = parseFloat(getComputedStyle(rail).scrollPaddingLeft) || 0;
-    const left = rail.scrollLeft + card.getBoundingClientRect().left - rail.getBoundingClientRect().left - pad;
-    rail.scrollTo({ left, behavior: smooth && !calm.matches ? 'smooth' : 'auto' });
-  }
-  const markDot = (card) => [...rail.children].forEach((c, i) => dots.children[i].classList.toggle('on', c === card));
-
-  // A swipe chooses the card it stops on.
-  function settled() {
-    if (wideScreen.matches) return;
-    const start = rail.getBoundingClientRect().left + (parseFloat(getComputedStyle(rail).scrollPaddingLeft) || 0);
-    const near = [...rail.children].reduce((a, b) =>
-      Math.abs(b.getBoundingClientRect().left - start) < Math.abs(a.getBoundingClientRect().left - start) ? b : a);
-    const input = near.querySelector('input');
-    if (!input.checked) input.click();
-  }
-
-  function pick(cause, card) {
+  function pick(cause) {
     selected = cause;
     renderPanel(cause);
     placePanel();
-    reveal(card, true);
-    markDot(card);
     announce(`Избрано: ${cause.title}`);
   }
 
@@ -298,21 +274,9 @@ export function initDonate({ config, needs, notice }) {
     introEl.textContent = single
       ? 'Даренията отиват директно в клуба, без посредници. Скоро тук ще можете да изберете и конкретна кауза – пътуване до турнир, топки или екипи.'
       : manyTexts[1];
-    // New totals redraw the row; the visitor stays where they had swiped to.
-    const scrolled = rail ? rail.scrollLeft : null;
-    const cards = options.map((c) => causeCard(c, c === selected, pick, animate));
-    rail = el('div', { class: 'cause-list' }, cards);
-    dots = el('div', { class: 'cause-dots', 'aria-hidden': 'true' }, cards.map(() => el('span')));
-    if ('onscrollend' in window) rail.addEventListener('scrollend', settled);
-    else {
-      let timer;
-      rail.addEventListener('scroll', () => { clearTimeout(timer); timer = setTimeout(settled, 150); }, { passive: true });
-    }
-    causesEl.replaceChildren(el('legend', { class: 'sr-only', text: 'Изберете кауза' }), rail, dots);
-    const card = cards[options.indexOf(selected)];
-    if (scrolled === null) reveal(card, false);
-    else rail.scrollLeft = scrolled;
-    markDot(card);
+    causesEl.replaceChildren(
+      el('legend', { class: 'sr-only', text: 'Изберете кауза' }),
+      ...options.map((c) => causeCard(c, c === selected, pick, animate)));
     renderPanel(selected);
     placePanel();
     if (focused) causesEl.querySelector(`input[value="${CSS.escape(focused)}"]`)?.focus({ preventScroll: true });
@@ -323,11 +287,7 @@ export function initDonate({ config, needs, notice }) {
   }
 
   show(needs, true);
-  wideScreen.addEventListener('change', () => {
-    placePanel();
-    const card = causesEl.querySelector('input:checked')?.closest('.cause');
-    if (card) reveal(card, false);
-  });
+  wideScreen.addEventListener('change', placePanel);
   if (wanted || thanked || location.hash === '#podkrepi') document.getElementById('podkrepi').scrollIntoView();
   return { update: (list) => show(list, false) };
 }
