@@ -17,7 +17,7 @@ export default {
 
   // Bank transfer. While iban is empty, the site asks donors to write for the bank details.
   bank: {
-    recipient: 'СДРУЖЕНИЕ „БАСКЕТБОЛЕН КЛУБ „СЕПТЕМВРИ-97“',
+    recipient: 'СДРУЖЕНИЕ БАСКЕТБОЛЕН КЛУБ „СЕПТЕМВРИ-97“',
     iban: 'BG12UBBS81551012290850',
     bic: 'UBBSBGSF',
     bankName: 'Обединена българска банка (ОББ)',
