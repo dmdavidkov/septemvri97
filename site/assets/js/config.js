@@ -23,7 +23,7 @@ export default {
     bankName: '',
   },
 
-  email: 'septemvri97bm@abv.bg',
+  email: 'bmandur11@icloud.com',
   facebookPage: 'https://www.facebook.com/107623030976164',
   siteUrl: 'https://www.septemvri97.eu/',
 
