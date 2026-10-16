@@ -217,6 +217,10 @@ export function initDonate({ config, needs, notice }) {
       el('a', { class: 'btn btn-ghost btn-small', href: mailto(config.email, `Дарение/спонсорство – ${what}`, body) }, 'Изпратете запитване'));
   }
 
+  const docNote = (reference) => el('p', { class: 'pay-hint' },
+    'Ако ви трябва документ за дарението (за фирми – за данъчни цели), ',
+    el('a', { href: mailto(config.email, `${reference} – документ`), text: 'пишете ни' }), '.');
+
   const shareBlock = (cause) => el('div', { class: 'panel-actions' }, shareButton(cause, 'btn btn-ghost btn-small'));
 
   let head;
@@ -234,6 +238,7 @@ export function initDonate({ config, needs, notice }) {
       el('p', { class: 'muted', text: cause.goal ? `Остават ${formatEuro(left)} до целта.` : 'Всяка сума помага.' }));
     body = el('div', { class: 'panel-body' },
       payReady || config.bank.iban ? [onlineBlock(cause), bankBlock(reference)] : writeUsBlock(cause, reference),
+      docNote(reference),
       companyBlock(cause));
     share = shareBlock(cause);
     panel.replaceChildren(head, body);
