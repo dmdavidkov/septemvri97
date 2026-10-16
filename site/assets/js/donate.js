@@ -233,8 +233,8 @@ export function initDonate({ config, needs, notice }) {
     head = el('div', { class: 'panel-head' },
       el('p', { class: 'panel-kicker', text: cause.code ? `Кауза ${cause.code}` : 'Дарение' }),
       el('h3', { class: 'panel-title', text: cause.title }),
-      // The cause card isn't shown when it is the only option, so its description goes here.
-      single && cause.description ? el('p', { class: 'muted', text: cause.description }) : null,
+      // Phone cards and the single-cause panel don't show the description, so it goes here. Wide screens hide it again.
+      cause.description ? el('p', { class: 'muted panel-desc', text: cause.description }) : null,
       el('p', { class: 'muted', text: cause.goal ? `Остават ${formatEuro(left)} до целта.` : 'Всяка сума помага.' }));
     body = el('div', { class: 'panel-body' },
       payReady || config.bank.iban ? [onlineBlock(cause), bankBlock(reference)] : writeUsBlock(cause, reference),
@@ -244,23 +244,41 @@ export function initDonate({ config, needs, notice }) {
     panel.replaceChildren(head, body);
   }
 
-  // Phones: the panel opens right under the chosen cause. Wider screens keep it in its own column.
   // Sharing comes last, except in the wide single-cause panel, where it fills the left column under the title.
   const wideScreen = matchMedia('(min-width: 960px)');
+  const calm = matchMedia('(prefers-reduced-motion: reduce)');
   function placePanel() {
-    const card = !single && !wideScreen.matches && causesEl.querySelector('input:checked')?.closest('.cause');
-    if (card) card.after(panel);
-    else if (panel.parentElement !== donateEl) donateEl.append(panel);
     (single && wideScreen.matches ? head : body).append(share);
   }
 
+  // Phones and tablets swipe through the causes in one row, and the panel stays put under it.
+  // Wide screens list the causes next to the panel.
+  let rail;
+  let dots;
+  function reveal(card, smooth) {
+    if (wideScreen.matches) return;
+    const pad = parseFloat(getComputedStyle(rail).scrollPaddingLeft) || 0;
+    const left = rail.scrollLeft + card.getBoundingClientRect().left - rail.getBoundingClientRect().left - pad;
+    rail.scrollTo({ left, behavior: smooth && !calm.matches ? 'smooth' : 'auto' });
+  }
+  const markDot = (card) => [...rail.children].forEach((c, i) => dots.children[i].classList.toggle('on', c === card));
+
+  // A swipe chooses the card it stops on.
+  function settled() {
+    if (wideScreen.matches) return;
+    const start = rail.getBoundingClientRect().left + (parseFloat(getComputedStyle(rail).scrollPaddingLeft) || 0);
+    const near = [...rail.children].reduce((a, b) =>
+      Math.abs(b.getBoundingClientRect().left - start) < Math.abs(a.getBoundingClientRect().left - start) ? b : a);
+    const input = near.querySelector('input');
+    if (!input.checked) input.click();
+  }
+
   function pick(cause, card) {
-    // Moving the panel shifts the cards below it; keep the tapped card where it was on screen.
-    const before = card.getBoundingClientRect().top;
     selected = cause;
     renderPanel(cause);
     placePanel();
-    window.scrollBy(0, card.getBoundingClientRect().top - before);
+    reveal(card, true);
+    markDot(card);
     announce(`Избрано: ${cause.title}`);
   }
 
@@ -280,9 +298,21 @@ export function initDonate({ config, needs, notice }) {
     introEl.textContent = single
       ? 'Даренията отиват директно в клуба, без посредници. Скоро тук ще можете да изберете и конкретна кауза – пътуване до турнир, топки или екипи.'
       : manyTexts[1];
-    causesEl.replaceChildren(
-      el('legend', { class: 'sr-only', text: 'Изберете кауза' }),
-      ...options.map((c) => causeCard(c, c === selected, pick, animate)));
+    // New totals redraw the row; the visitor stays where they had swiped to.
+    const scrolled = rail ? rail.scrollLeft : null;
+    const cards = options.map((c) => causeCard(c, c === selected, pick, animate));
+    rail = el('div', { class: 'cause-list' }, cards);
+    dots = el('div', { class: 'cause-dots', 'aria-hidden': 'true' }, cards.map(() => el('span')));
+    if ('onscrollend' in window) rail.addEventListener('scrollend', settled);
+    else {
+      let timer;
+      rail.addEventListener('scroll', () => { clearTimeout(timer); timer = setTimeout(settled, 150); }, { passive: true });
+    }
+    causesEl.replaceChildren(el('legend', { class: 'sr-only', text: 'Изберете кауза' }), rail, dots);
+    const card = cards[options.indexOf(selected)];
+    if (scrolled === null) reveal(card, false);
+    else rail.scrollLeft = scrolled;
+    markDot(card);
     renderPanel(selected);
     placePanel();
     if (focused) causesEl.querySelector(`input[value="${CSS.escape(focused)}"]`)?.focus({ preventScroll: true });
@@ -293,7 +323,11 @@ export function initDonate({ config, needs, notice }) {
   }
 
   show(needs, true);
-  wideScreen.addEventListener('change', placePanel);
+  wideScreen.addEventListener('change', () => {
+    placePanel();
+    const card = causesEl.querySelector('input:checked')?.closest('.cause');
+    if (card) reveal(card, false);
+  });
   if (wanted || thanked || location.hash === '#podkrepi') document.getElementById('podkrepi').scrollIntoView();
   return { update: (list) => show(list, false) };
 }

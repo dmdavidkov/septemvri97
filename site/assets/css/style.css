@@ -428,7 +428,8 @@ button { font: inherit; color: inherit; }
   .donate.single .panel-title { font-size: 1.8rem; }
   .donate.single .panel-body > .panel-block:first-child { margin-top: 0; padding-top: 0; border-top: 0; }
 }
-.causes { display: grid; gap: 12px; min-width: 0; margin: 0; padding: 0; border: 0; }
+.causes { min-width: 0; margin: 0; padding: 0; border: 0; }
+.cause-list { display: grid; gap: 12px; }
 .cause {
   position: relative; display: block;
   padding: 18px 18px 18px 56px;
@@ -459,6 +460,26 @@ progress { display: block; width: 100%; height: 10px; border: 0; border-radius: 
 progress::-webkit-progress-bar { background: #EBE1D8; border-radius: 99px; }
 progress::-webkit-progress-value { background: linear-gradient(90deg, var(--red), var(--coral)); border-radius: 99px; transition: width .9s cubic-bezier(.2, .7, .2, 1); }
 progress::-moz-progress-bar { background: linear-gradient(90deg, var(--red), var(--coral)); border-radius: 99px; }
+/* Phones and tablets: one row of short cards to swipe, dots under it, the panel below. The description moves into the panel. */
+@media (max-width: 959px) {
+  .cause-list {
+    grid-auto-flow: column; grid-auto-columns: min(84%, 340px);
+    margin: 0 calc(-1 * var(--gutter)); padding: 8px var(--gutter) 14px;
+    overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scroll-padding-inline: var(--gutter); scrollbar-width: none;
+  }
+  .cause-list::-webkit-scrollbar { display: none; }
+  .cause { display: flex; flex-direction: column; scroll-snap-align: start; }
+  .cause:hover { transform: none; }
+  .cause .cause-progress { margin-top: auto; padding-top: 14px; }
+  .cause-desc { display: none; }
+  .cause-dots { display: flex; justify-content: center; gap: 6px; }
+  .cause-dots span { width: 7px; height: 7px; border-radius: 99px; background: rgba(11, 10, 12, .2); transition: width .2s ease, background-color .2s ease; }
+  .cause-dots span.on { width: 20px; background: var(--red); }
+}
+@media (min-width: 960px) {
+  .cause-dots { display: none; }
+  .donate:not(.single) .panel-desc { display: none; }
+}
 
 .donate-panel {
   padding: 26px; border-radius: 24px;
