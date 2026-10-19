@@ -208,19 +208,6 @@ export function initDonate({ config, needs, notice }) {
     return block;
   }
 
-  function companyBlock(cause) {
-    const what = cause.code ? `${cause.code} ${cause.title}` : 'общо за клуба';
-    const body = `Здравейте,\n\nИскаме да подкрепим „${cause.title}“ като фирма.\n\nФирма:\nЕИК:\nСума:\nЛице за контакт и телефон:\n`;
-    return el('div', { class: 'panel-block' },
-      el('h4', { text: 'Фирма сте?' }),
-      el('p', { text: 'Пишете ни – ще подготвим договор за дарение или спонсорство и документи за вашето счетоводство.' }),
-      el('a', { class: 'btn btn-ghost btn-small', href: mailto(config.email, `Дарение/спонсорство – ${what}`, body) }, 'Изпратете запитване'));
-  }
-
-  const docNote = (reference) => el('p', { class: 'pay-hint' },
-    'Ако ви трябва документ за дарението (за фирми – за данъчни цели), ',
-    el('a', { href: mailto(config.email, `${reference} – документ`), text: 'пишете ни' }), '.');
-
   const shareBlock = (cause) => el('div', { class: 'panel-actions' }, shareButton(cause, 'btn btn-ghost btn-small'));
 
   let head;
@@ -237,9 +224,7 @@ export function initDonate({ config, needs, notice }) {
       cause.description ? el('p', { class: 'muted panel-desc', text: cause.description }) : null,
       el('p', { class: 'muted', text: cause.goal ? `Остават ${formatEuro(left)} до целта.` : 'Всяка сума помага.' }));
     body = el('div', { class: 'panel-body' },
-      payReady || config.bank.iban ? [onlineBlock(cause), bankBlock(reference)] : writeUsBlock(cause, reference),
-      docNote(reference),
-      companyBlock(cause));
+      payReady || config.bank.iban ? [onlineBlock(cause), bankBlock(reference)] : writeUsBlock(cause, reference));
     share = shareBlock(cause);
     panel.replaceChildren(head, body);
   }
