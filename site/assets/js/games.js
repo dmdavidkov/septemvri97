@@ -80,14 +80,13 @@ function statusBadge(g, status) {
   return null;
 }
 
-function gameLink(g, status) {
-  if (status === 'live' && g.liveUrl) return el('a', { class: 'link-arrow', href: g.liveUrl, target: '_blank', rel: 'noopener', text: 'Гледай' });
+function gameLink(g) {
   if (!g.url) return null;
   return el('a', { class: 'link-arrow game-link', href: g.url, target: '_blank', rel: 'noopener', title: g.source === 'bfb' ? 'Мачът в сайта на БФБ' : null, text: g.source === 'bfb' ? 'БФБ' : 'Линк' });
 }
 
 // BFB adds the BFB TV link close to the game; the recording stays there afterwards.
-function tvLink(g, status, labels = { upcoming: 'Излъчване в BFB TV', played: 'Запис в BFB TV', pending: 'Запис в BFB TV' }) {
+function tvLink(g, status, labels = { upcoming: 'Излъчване в BFB TV', live: 'Гледай в BFB TV', played: 'Запис в BFB TV', pending: 'Запис в BFB TV' }) {
   if (!g.liveUrl || !labels[status]) return null;
   return el('a', { class: 'tv-link', href: g.liveUrl, target: '_blank', rel: 'noopener', text: labels[status] });
 }
@@ -137,7 +136,7 @@ function gameRow(g, team, now) {
       tvLink(g, status)),
     el('div', { class: 'game-status' },
       statusBadge(g, status),
-      el('div', { class: 'game-actions' }, gameLink(g, status), shareButton(g, team))));
+      el('div', { class: 'game-actions' }, gameLink(g), shareButton(g, team))));
 }
 
 // ---- Calendar (.ics) for one game ----
