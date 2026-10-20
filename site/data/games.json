@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-19T20:24:48.679Z",
+  "updated": "2026-10-20T14:44:25.295Z",
   "season": "2026/2027",
   "teams": [
     {
@@ -185,7 +185,10 @@
         "logo": "assets/logos/bfb/clubs-20250527185844.png",
         "isUs": false
       },
-      "score": null,
+      "score": {
+        "home": 38,
+        "away": 90
+      },
       "liveUrl": "https://tv.basketball.bg/index.php?i_id=384690",
       "url": "https://comps.basketball.bg/game-384690"
     },
