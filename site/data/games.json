@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-22T15:35:54.517Z",
+  "updated": "2026-10-22T20:23:36.501Z",
   "season": "2026/2027",
   "teams": [
     {
@@ -65,7 +65,7 @@
       "venue": "Триадица - София",
       "home": {
         "name": "Славия 1913",
-        "logo": "assets/logos/bfb/teams-20260812114912.jpg",
+        "logo": "assets/logos/bfb/clubs-20250801104238.jpg",
         "isUs": false
       },
       "away": {
@@ -358,7 +358,7 @@
       "venue": "Младост - Монтана - Монтана",
       "home": {
         "name": "Монтана 2003",
-        "logo": "assets/logos/bfb/teams-20251017104021.png",
+        "logo": "assets/logos/bfb/clubs-20170210232847.jpg",
         "isUs": false
       },
       "away": {
@@ -663,7 +663,7 @@
       },
       "away": {
         "name": "Славия 1913",
-        "logo": "assets/logos/bfb/teams-20260812114912.jpg",
+        "logo": "assets/logos/bfb/clubs-20250801104238.jpg",
         "isUs": false
       },
       "score": null,
@@ -938,7 +938,7 @@
       },
       "away": {
         "name": "Монтана 2003",
-        "logo": "assets/logos/bfb/teams-20251017104021.png",
+        "logo": "assets/logos/bfb/clubs-20170210232847.jpg",
         "isUs": false
       },
       "score": null,
