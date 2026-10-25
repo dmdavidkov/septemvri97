@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-25T11:19:52.465Z",
+  "updated": "2026-10-25T14:21:05.354Z",
   "season": "2026/2027",
   "teams": [
     {
@@ -245,7 +245,7 @@
         "home": 100,
         "away": 37
       },
-      "liveUrl": "https://tv.basketball.bg/index.php?i_id=385158",
+      "liveUrl": null,
       "url": "https://comps.basketball.bg/game-385158"
     },
     {
