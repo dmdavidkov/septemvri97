@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-11T18:24:17.128Z",
+  "updated": "2026-11-12T14:17:23.663Z",
   "season": "2026/2027",
   "teams": [
     {
@@ -494,7 +494,7 @@
         "isUs": true
       },
       "score": null,
-      "liveUrl": null,
+      "liveUrl": "https://tv.basketball.bg/index.php?i_id=385093",
       "url": "https://comps.basketball.bg/game-385093"
     },
     {
@@ -519,7 +519,7 @@
         "isUs": false
       },
       "score": null,
-      "liveUrl": null,
+      "liveUrl": "https://tv.basketball.bg/index.php?i_id=385120",
       "url": "https://comps.basketball.bg/game-385120"
     },
     {
