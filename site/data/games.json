@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-22T11:29:39.090Z",
+  "updated": "2026-11-24T08:20:43.578Z",
   "season": "2026/2027",
   "teams": [
     {
@@ -661,31 +661,6 @@
       "score": null,
       "liveUrl": null,
       "url": "https://comps.basketball.bg/game-384799"
-    },
-    {
-      "id": "bfb-385061",
-      "source": "bfb",
-      "team": "u14",
-      "competition": "Момичета 14г.",
-      "phase": "Елитна група ЗАПАД",
-      "round": 1,
-      "date": "2026-11-29",
-      "time": "10:00",
-      "start": "2026-11-29T10:00:00+02:00",
-      "venue": null,
-      "home": {
-        "name": "Рилски спортист",
-        "logo": "assets/logos/bfb/clubs-20250527185844.png",
-        "isUs": false
-      },
-      "away": {
-        "name": "Септември 97",
-        "logo": "assets/logos/bfb/clubs-20250725084541.jpg",
-        "isUs": true
-      },
-      "score": null,
-      "liveUrl": null,
-      "url": "https://comps.basketball.bg/game-385061"
     },
     {
       "id": "bfb-384803",
